@@ -418,7 +418,7 @@ function App() {
             } else if (realDiff === predDiff) {
               pts = 3
               partialMatches += 1
-            } else if (realSign === predSign) {
+            } else if (realSign === predSign && realSign !== 0) {
               pts = 1
               partialMatches += 1
             }
@@ -882,7 +882,7 @@ function App() {
                 </div>
                 <div className="rule-card pts-1">
                   <div className="rule-pts">1 Pt</div>
-                  <div className="rule-desc"><strong>Tendencia:</strong> Acertar únicamente el equipo ganador (o empate) pero fallar en la diferencia.</div>
+                  <div className="rule-desc"><strong>Tendencia:</strong> Acertar únicamente el equipo ganador pero fallar en la diferencia de goles.</div>
                 </div>
               </div>
             </div>
