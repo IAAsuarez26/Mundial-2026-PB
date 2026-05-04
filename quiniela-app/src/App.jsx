@@ -2,33 +2,8 @@ import { useState, useEffect, useMemo } from 'react'
 import emailjs from '@emailjs/browser'
 import { supabase } from './supabaseClient'
 import './App.css'
-import data from './data.json'
+// import data from './data.json' // Removed local data dependency
 
-// Calculate group matches statically
-const groupMatches = data.matches.filter(match => {
-  let foundT1 = false
-  let foundT2 = false
-  Object.values(data.groups).forEach(teams => {
-    if (teams.some(t => t.id === match.team1)) foundT1 = true
-    if (teams.some(t => t.id === match.team2)) foundT2 = true
-  })
-  return foundT1 && foundT2
-})
-
-const jornadas = [
-  { name: 'Jornada 1', matches: groupMatches.filter(m => m.id >= 1 && m.id <= 24) },
-  { name: 'Jornada 2', matches: groupMatches.filter(m => m.id >= 25 && m.id <= 48) },
-  { name: 'Jornada 3', matches: groupMatches.filter(m => m.id >= 49 && m.id <= 72) }
-]
-
-// Helper to get team name by ID statically
-const getTeamName = (teamId) => {
-  for (const teams of Object.values(data.groups)) {
-    const team = teams.find(t => t.id === teamId)
-    if (team) return team.name
-  }
-  return teamId
-}
 
 // Helper to check if a match has already started
 const isMatchStarted = (matchDate) => {
@@ -45,50 +20,77 @@ function App() {
   const [expandedJornadas, setExpandedJornadas] = useState({ 'Jornada 1': true })
   const [showGroups, setShowGroups] = useState(true)
 
-  const toggleJornada = (jornadaName) => {
-    setExpandedJornadas(prev => ({ ...prev, [jornadaName]: !prev[jornadaName] }))
-  }
-  
-  // Supabase & Admin State
+  // Dynamic Data State
+  const [teams, setTeams] = useState([])
+  const [matches, setMatches] = useState([])
+  const [groups, setGroups] = useState({})
   const [allQuinielas, setAllQuinielas] = useState({})
   const [realResults, setRealResults] = useState({})
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false)
   const [adminPassAttempt, setAdminPassAttempt] = useState('')
   const [isSaving, setIsSaving] = useState(false)
 
+  const toggleJornada = (jornadaName) => {
+    setExpandedJornadas(prev => ({ ...prev, [jornadaName]: !prev[jornadaName] }))
+  }
+
+  // Helper to get team name by ID
+  const getTeamName = (teamId) => {
+    const team = teams.find(t => t.id === teamId)
+    return team ? team.name : teamId
+  }
+
   // Load from Supabase on mount
   useEffect(() => {
     const fetchData = async () => {
-      // 1. Fetch Quinielas
-      const { data: quinielasData, error: qError } = await supabase
-        .from('quinielas')
-        .select('*')
+      // 1. Fetch Teams
+      const { data: teamsData } = await supabase.from('teams').select('*')
+      if (teamsData) {
+        setTeams(teamsData)
+        const grouped = teamsData.reduce((acc, curr) => {
+          const letter = curr.group_letter
+          if (!acc[letter]) acc[letter] = []
+          acc[letter].push(curr)
+          return acc
+        }, {})
+        setGroups(grouped)
+      }
+
+      // 2. Fetch Matches
+      const { data: matchesData } = await supabase.from('matches').select('*').order('id')
+      if (matchesData) setMatches(matchesData)
+
+      // 3. Fetch Participantes & Predicciones
+      const { data: participantsData } = await supabase.from('participantes').select('*')
+      const { data: predsData } = await supabase.from('predicciones').select('*')
       
-      if (!qError && quinielasData) {
-        const quinielasObj = quinielasData.reduce((acc, curr) => ({
-          ...acc,
-          [curr.nombre]: { 
-            cedula: curr.cedula, 
-            email: curr.email, 
-            predictions: curr.predicciones 
+      if (participantsData && predsData) {
+        const quinielasObj = {}
+        participantsData.forEach(p => {
+          const userPreds = predsData
+            .filter(pr => pr.cedula === p.cedula)
+            .reduce((acc, curr) => ({
+              ...acc,
+              [curr.match_id]: { team1: curr.score_team1, team2: curr.score_team2 }
+            }), {})
+          
+          quinielasObj[p.nombre] = {
+            cedula: p.cedula,
+            email: p.email,
+            predictions: userPreds
           }
-        }), {})
+        })
         setAllQuinielas(quinielasObj)
       }
 
-      // 2. Fetch Real Results
-      const { data: resultsData, error: rError } = await supabase
-        .from('resultados_reales')
-        .select('*')
-      
-      if (!rError && resultsData) {
-        const resultsObj = resultsData.reduce((acc, curr) => ({
-          ...acc,
-          [curr.match_id]: {
-            team1: curr.score_team1,
-            team2: curr.score_team2
+      // 4. Populate Real Results from matches table
+      if (matchesData) {
+        const resultsObj = matchesData.reduce((acc, curr) => {
+          if (curr.score_team1 !== null && curr.score_team2 !== null) {
+            acc[curr.id] = { team1: curr.score_team1, team2: curr.score_team2 }
           }
-        }), {})
+          return acc
+        }, {})
         setRealResults(resultsObj)
       }
     }
@@ -121,126 +123,97 @@ function App() {
   const saveRealResults = async () => {
     setIsSaving(true)
     try {
-      // Format results for the Edge Function
       const resultsArray = Object.entries(realResults).map(([id, scores]) => ({
         match_id: parseInt(id),
         score_team1: scores.team1,
         score_team2: scores.team2
       }))
 
-      const response = await fetch('https://ivxvatmhgttcmyrqctos.supabase.co/functions/v1/save-results', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer sb_publishable_0AsGK4JBvD-IzmOsyj2AwQ_aQ94N0KK`
-        },
-        body: JSON.stringify({
-          password: adminPassAttempt,
-          results: resultsArray
-        })
-      })
-
-      const result = await response.json()
-      if (response.ok) {
-        alert('¡Resultados Reales guardados en Supabase exitosamente!')
-      } else {
-        alert(`Error: ${result.error || 'No se pudo guardar'}`)
+      for (const res of resultsArray) {
+        await supabase.from('matches').update({
+          score_team1: res.score_team1,
+          score_team2: res.score_team2,
+          status: 'finished'
+        }).eq('id', res.match_id)
       }
+      
+      alert('¡Resultados Reales guardados exitosamente!')
     } catch (err) {
       console.error(err)
-      alert('Error de conexión al intentar guardar resultados.')
+      alert('Error al guardar resultados.')
     } finally {
       setIsSaving(false)
     }
   }
 
   // Save current user predictions
-  const savePredictions = () => {
+  const savePredictions = async () => {
     if (!userName.trim() || !userCedula.trim() || !userEmail.trim()) {
-      alert("Por favor ingresa tu Nombre, Cédula y Email para guardar la quiniela.")
+      alert("Por favor ingresa tu Nombre, Cédula y Email.")
       return
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (!emailRegex.test(userEmail.trim())) {
-      alert("Por favor ingresa un correo electrónico válido (ejemplo: usuario@dominio.com).")
+      alert("Email inválido.")
       return
     }
 
+    const groupMatches = matches.filter(m => m.id <= 72)
     const missingMatch = groupMatches.find(match => {
-      // Skip validation for matches that have already started (user might have joined late)
       if (isMatchStarted(match.date)) return false
-      
       const pred = predictions[match.id]
       return !pred || pred.team1 === undefined || pred.team1 === null || pred.team2 === undefined || pred.team2 === null
     })
 
     if (missingMatch) {
-      alert(`Falta información. Debes completar el resultado para el Partido ${missingMatch.id} (${getTeamName(missingMatch.team1)} vs ${getTeamName(missingMatch.team2)}) antes de guardar tu quiniela.`)
+      alert(`Falta el Partido ${missingMatch.id}.`)
       return
     }
 
-    // Security check: ensure no predictions for past matches were modified (optional but good)
-    // For now, we'll just allow saving, but since inputs are disabled, they shouldn't be able to change them.
-
     setIsSaving(true)
     
-    const saveToSupabase = async () => {
-      // 1. Save to quinielas table
-      const { error: qError } = await supabase
-        .from('quinielas')
-        .upsert({
-          nombre: userName.trim(),
-          cedula: userCedula.trim(),
-          email: userEmail.trim(),
-          predicciones: predictions,
-          updated_at: new Date().toISOString()
-        }, { onConflict: 'cedula' })
+    try {
+      await supabase.from('participantes').upsert({
+        cedula: userCedula.trim(),
+        nombre: userName.trim(),
+        email: userEmail.trim(),
+        updated_at: new Date().toISOString()
+      })
 
-      if (qError) {
-        console.error('Error saving to quinielas:', qError)
-        return false
-      }
+      await supabase.from('predicciones').delete().eq('cedula', userCedula.trim())
+      
+      const predsToInsert = Object.entries(predictions).map(([matchId, scores]) => ({
+        cedula: userCedula.trim(),
+        match_id: parseInt(matchId),
+        score_team1: scores.team1,
+        score_team2: scores.team2
+      }))
 
-      // 2. Save to participantes table
-      const { error: pError } = await supabase
-        .from('participantes')
-        .upsert({
-          cedula: userCedula.trim(),
-          nombre: userName.trim(),
-          email: userEmail.trim(),
-          updated_at: new Date().toISOString()
-        }, { onConflict: 'cedula' })
+      const { error } = await supabase.from('predicciones').insert(predsToInsert)
+      if (error) throw error
 
-      if (pError) {
-        console.error('Error saving to participantes:', pError)
-        // We don't fail the whole process if this fails, but it's good to log
-      }
-
-      return true
+      setAllQuinielas(prev => ({
+        ...prev,
+        [userName.trim()]: { cedula: userCedula, email: userEmail, predictions }
+      }))
+      
+      sendEmail()
+    } catch (err) {
+      console.error(err)
+      alert("Error al guardar.")
+    } finally {
+      setIsSaving(false)
     }
-
-    saveToSupabase().then(success => {
-      if (success) {
-        // Update local state for immediate feedback
-        const updated = { ...allQuinielas, [userName]: { cedula: userCedula, email: userEmail, predictions } }
-        setAllQuinielas(updated)
-        
-        // Send email
-        sendEmail()
-      } else {
-        alert("Hubo un error al guardar tu quiniela en la base de datos. Por favor intenta de nuevo.")
-        setIsSaving(false)
-      }
-    })
   }
 
   const sendEmail = () => {
     let message = `Hola ${userName},\n\nAquí tienes un resumen de tus predicciones para la Quiniela Mundial 2026:\n\n`
+    const groupMatches = matches.filter(m => m.id <= 72)
     groupMatches.forEach(match => {
       const pred = predictions[match.id]
       if (pred) {
-        message += `Partido ${match.id}: ${getTeamName(match.team1)} ${pred.team1} - ${pred.team2} ${getTeamName(match.team2)}\n`
+        message += `Partido ${match.id}: ${getTeamName(match.team1_id)} ${pred.team1} - ${pred.team2} ${getTeamName(match.team2_id)}\n`
       }
     })
 
@@ -258,28 +231,39 @@ function App() {
       emailjs.send(SERVICE_ID, TEMPLATE_ID, templateParams, PUBLIC_KEY)
         .then((response) => {
            console.log('SUCCESS!', response.status, response.text);
-           alert(`¡Predicciones de ${userName} guardadas en la nube y correo enviado exitosamente a ${userEmail}!`);
+           alert(`¡Predicciones de ${userName} guardadas y correo enviado exitosamente!`);
+           resetForm();
         }, (err) => {
            console.log('FAILED...', err);
-           alert(`¡Predicciones guardadas en la nube! (Pero hubo un error enviando el correo: ${err.text})`);
+           alert(`¡Predicciones guardadas! (Pero hubo un error enviando el correo)`);
+           resetForm();
         })
         .finally(() => setIsSaving(false));
     } else {
-      alert(`¡Predicciones de ${userName} guardadas exitosamente! (El envío de correos requiere configuración en el código)`)
+      alert(`¡Predicciones de ${userName} guardadas exitosamente!`)
+      resetForm();
       setIsSaving(false)
     }
   }
 
+  const resetForm = () => {
+    setUserName('')
+    setUserCedula('')
+    setUserEmail('')
+    setPredictions({})
+  }
+
+
   // Calculate points for the group standings (based on predictions OR real results)
   const calculateStandings = (matchData) => {
     const standings = {}
-    Object.keys(data.groups).forEach(groupName => {
-      standings[groupName] = data.groups[groupName].map(team => ({
+    Object.keys(groups).forEach(groupName => {
+      standings[groupName] = groups[groupName].map(team => ({
         ...team, points: 0, goalsFor: 0, goalsAgainst: 0, goalDiff: 0, played: 0, won: 0, drawn: 0, lost: 0
       }))
     })
 
-    data.matches.forEach(match => {
+    matches.forEach(match => {
       const pred = matchData[match.id]
       if (pred && pred.team1 !== undefined && pred.team1 !== null && 
           pred.team2 !== undefined && pred.team2 !== null) {
@@ -289,8 +273,8 @@ function App() {
         let t2Index = -1
 
         for (const [groupName, teams] of Object.entries(standings)) {
-          const i1 = teams.findIndex(t => t.id === match.team1)
-          const i2 = teams.findIndex(t => t.id === match.team2)
+          const i1 = teams.findIndex(t => t.id === match.team1_id)
+          const i2 = teams.findIndex(t => t.id === match.team2_id)
           if (i1 !== -1 && i2 !== -1) {
             matchGroup = groupName
             t1Index = i1
@@ -347,20 +331,18 @@ function App() {
 
   // Calculate Ranking and Stats
   const rankingInfo = useMemo(() => {
-    let playedMatches = 0
+    let playedMatchesCount = 0
+    const groupMatches = matches.filter(m => m.id <= 72)
     
-    // Contar encuentros disputados
     groupMatches.forEach(match => {
-      const real = realResults[match.id]
-      if (real && real.team1 !== null && real.team1 !== undefined &&
-          real.team2 !== null && real.team2 !== undefined) {
-          playedMatches += 1
+      if (match.score_team1 !== null && match.score_team2 !== null) {
+          playedMatchesCount += 1
       }
     })
 
     const totalGroupMatches = groupMatches.length
-    const remainingMatches = totalGroupMatches - playedMatches
-    const maxPossiblePoints = playedMatches * 3
+    const remainingMatches = totalGroupMatches - playedMatchesCount
+    const maxPossiblePoints = playedMatchesCount * 3
 
     const scores = []
     for (const [user, userData] of Object.entries(allQuinielas)) {
@@ -368,25 +350,21 @@ function App() {
       let exactMatches = 0
       let partialMatches = 0
       
-      const userPreds = userData.predictions || userData
+      const userPreds = userData.predictions
 
       groupMatches.forEach(match => {
-        const real = realResults[match.id]
+        const real1 = match.score_team1
+        const real2 = match.score_team2
         const pred = userPreds[match.id]
         
-        if (real && real.team1 !== null && real.team1 !== undefined && real.team2 !== null && real.team2 !== undefined &&
-            pred && pred.team1 !== null && pred.team1 !== undefined && pred.team2 !== null && pred.team2 !== undefined) {
-            
-            // Exact score
-            if (real.team1 === pred.team1 && real.team2 === pred.team2) {
+        if (real1 !== null && real2 !== null && pred && pred.team1 !== null && pred.team2 !== null) {
+            if (real1 === pred.team1 && real2 === pred.team2) {
               points += 3
               exactMatches += 1
-            } 
-            // Correct tendency (win, lose, draw)
-            else if (
-              (real.team1 > real.team2 && pred.team1 > pred.team2) ||
-              (real.team1 < real.team2 && pred.team1 < pred.team2) ||
-              (real.team1 === real.team2 && pred.team1 === pred.team2)
+            } else if (
+              (real1 > real2 && pred.team1 > pred.team2) ||
+              (real1 < real2 && pred.team1 < pred.team2) ||
+              (real1 === real2 && pred.team1 === pred.team2)
             ) {
               points += 1
               partialMatches += 1
@@ -397,13 +375,13 @@ function App() {
     }
     
     return {
-      playedMatches,
+      playedMatches: playedMatchesCount,
       remainingMatches,
       maxPossiblePoints,
       totalGroupMatches,
       scores: scores.sort((a, b) => b.points - a.points)
     }
-  }, [allQuinielas, realResults])
+  }, [allQuinielas, matches, realResults])
 
   return (
     <div className="app-container">
@@ -524,52 +502,59 @@ function App() {
 
           <section className="matches-section">
             <h2 className="matches-header text-gradient" style={{marginBottom: '2rem'}}>Fase de Grupos</h2>
-            {jornadas.map((jornada, jIdx) => (
-              <div key={jornada.name} className="jornada-section" style={{marginBottom: '3rem'}}>
-                <div 
-                  className="jornada-header-toggle glass-panel" 
-                  onClick={() => toggleJornada(jornada.name)}
-                  style={{cursor: 'pointer', padding: '1rem', marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}
-                >
-                  <h3 className="text-gradient" style={{margin: 0, fontSize: '1.5rem'}}>{jornada.name}</h3>
-                  <span style={{fontSize: '1.5rem'}}>{expandedJornadas[jornada.name] ? '▲' : '▼'}</span>
-                </div>
-                {expandedJornadas[jornada.name] && (
-                <div className="matches-grid">
-                  {jornada.matches.map((match, idx) => {
-                    const dateStr = match.date ? new Date(match.date).toLocaleDateString() : 'TBD'
-                    const started = isMatchStarted(match.date)
-                    return (
-                      <div key={match.id} className={`glass-panel match-card ${started ? 'match-started' : ''}`} style={{ animationDelay: `${(idx % 10) * 0.05}s` }}>
-                        <div className="match-info">
-                          Partido {match.id} | {dateStr} {started && <span className="started-badge">Iniciado / Finalizado</span>}
+            {[
+              { name: 'Jornada 1', range: [1, 24] },
+              { name: 'Jornada 2', range: [25, 48] },
+              { name: 'Jornada 3', range: [49, 72] }
+            ].map((jornada, jIdx) => {
+              const jornadaMatches = matches.filter(m => m.id >= jornada.range[0] && m.id <= jornada.range[1])
+              return (
+                <div key={jornada.name} className="jornada-section" style={{marginBottom: '3rem'}}>
+                  <div 
+                    className="jornada-header-toggle glass-panel" 
+                    onClick={() => toggleJornada(jornada.name)}
+                    style={{cursor: 'pointer', padding: '1rem', marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}
+                  >
+                    <h3 className="text-gradient" style={{margin: 0, fontSize: '1.5rem'}}>{jornada.name}</h3>
+                    <span style={{fontSize: '1.5rem'}}>{expandedJornadas[jornada.name] ? '▲' : '▼'}</span>
+                  </div>
+                  {expandedJornadas[jornada.name] && (
+                  <div className="matches-grid">
+                    {jornadaMatches.map((match, idx) => {
+                      const dateStr = match.date ? new Date(match.date).toLocaleDateString() : 'TBD'
+                      const started = isMatchStarted(match.date)
+                      return (
+                        <div key={match.id} className={`glass-panel match-card ${started ? 'match-started' : ''}`} style={{ animationDelay: `${(idx % 10) * 0.05}s` }}>
+                          <div className="match-info">
+                            Partido {match.id} | {dateStr} {started && <span className="started-badge">Iniciado / Finalizado</span>}
+                          </div>
+                          <div className="match-teams">
+                            <div className="team">{getTeamName(match.team1_id)}</div>
+                            <input 
+                              type="number" min="0" className="team-input"
+                              value={predictions[match.id]?.team1 ?? ''}
+                              onChange={(e) => handleScoreChange(match.id, 'team1', e.target.value)}
+                              placeholder="0"
+                              disabled={started}
+                            />
+                            <span className="vs-badge">VS</span>
+                            <input 
+                              type="number" min="0" className="team-input"
+                              value={predictions[match.id]?.team2 ?? ''}
+                              onChange={(e) => handleScoreChange(match.id, 'team2', e.target.value)}
+                              placeholder="0"
+                              disabled={started}
+                            />
+                            <div className="team">{getTeamName(match.team2_id)}</div>
+                          </div>
                         </div>
-                        <div className="match-teams">
-                          <div className="team">{getTeamName(match.team1)}</div>
-                          <input 
-                            type="number" min="0" className="team-input"
-                            value={predictions[match.id]?.team1 ?? ''}
-                            onChange={(e) => handleScoreChange(match.id, 'team1', e.target.value)}
-                            placeholder="0"
-                            disabled={started}
-                          />
-                          <span className="vs-badge">VS</span>
-                          <input 
-                            type="number" min="0" className="team-input"
-                            value={predictions[match.id]?.team2 ?? ''}
-                            onChange={(e) => handleScoreChange(match.id, 'team2', e.target.value)}
-                            placeholder="0"
-                            disabled={started}
-                          />
-                          <div className="team">{getTeamName(match.team2)}</div>
-                        </div>
-                      </div>
-                    )
-                  })}
+                      )
+                    })}
+                  </div>
+                  )}
                 </div>
-                )}
-              </div>
-            ))}
+              )
+            })}
           </section>
 
           <div style={{display: 'flex', justifyContent: 'center', marginTop: '2rem'}}>
@@ -677,50 +662,57 @@ function App() {
           </section>
 
           <section className="matches-section" style={{marginTop: '0'}}>
-            {jornadas.map((jornada, jIdx) => (
-              <div key={jornada.name} className="jornada-section" style={{marginBottom: '3rem'}}>
-                <div 
-                  className="jornada-header-toggle glass-panel" 
-                  onClick={() => toggleJornada(jornada.name)}
-                  style={{cursor: 'pointer', padding: '1rem', marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}
-                >
-                  <h3 className="text-gradient" style={{margin: 0, fontSize: '1.5rem'}}>{jornada.name}</h3>
-                  <span style={{fontSize: '1.5rem'}}>{expandedJornadas[jornada.name] ? '▲' : '▼'}</span>
-                </div>
-                {expandedJornadas[jornada.name] && (
-                <div className="matches-grid">
-                  {jornada.matches.map((match, idx) => {
-                    const dateStr = match.date ? new Date(match.date).toLocaleDateString() : 'TBD'
-                    const real = realResults[match.id]
-                    const isFilled = real && real.team1 !== null && real.team1 !== undefined && real.team2 !== null && real.team2 !== undefined
-                    return (
-                      <div key={match.id} className={`glass-panel match-card admin-card ${isFilled ? 'admin-filled' : ''}`}>
-                        <div className="match-info">Partido {match.id} | {dateStr}</div>
-                        <div className="match-teams">
-                          <div className="team">{getTeamName(match.team1)}</div>
-                          <input 
-                            type="number" min="0" className="team-input admin-input"
-                            value={realResults[match.id]?.team1 ?? ''}
-                            onChange={(e) => handleRealScoreChange(match.id, 'team1', e.target.value)}
-                            placeholder="-"
-                          />
-                          <span className="vs-badge">VS</span>
-                          <input 
-                            type="number" min="0" className="team-input admin-input"
-                            value={realResults[match.id]?.team2 ?? ''}
-                            onChange={(e) => handleRealScoreChange(match.id, 'team2', e.target.value)}
-                            placeholder="-"
-                          />
-                          <div className="team">{getTeamName(match.team2)}</div>
+            {[
+              { name: 'Jornada 1', range: [1, 24] },
+              { name: 'Jornada 2', range: [25, 48] },
+              { name: 'Jornada 3', range: [49, 72] }
+            ].map((jornada, jIdx) => {
+              const jornadaMatches = matches.filter(m => m.id >= jornada.range[0] && m.id <= jornada.range[1])
+              return (
+                <div key={jornada.name} className="jornada-section" style={{marginBottom: '3rem'}}>
+                  <div 
+                    className="jornada-header-toggle glass-panel" 
+                    onClick={() => toggleJornada(jornada.name)}
+                    style={{cursor: 'pointer', padding: '1rem', marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}
+                  >
+                    <h3 className="text-gradient" style={{margin: 0, fontSize: '1.5rem'}}>{jornada.name}</h3>
+                    <span style={{fontSize: '1.5rem'}}>{expandedJornadas[jornada.name] ? '▲' : '▼'}</span>
+                  </div>
+                  {expandedJornadas[jornada.name] && (
+                  <div className="matches-grid">
+                    {jornadaMatches.map((match, idx) => {
+                      const dateStr = match.date ? new Date(match.date).toLocaleDateString() : 'TBD'
+                      const real = realResults[match.id]
+                      const isFilled = real && real.team1 !== null && real.team1 !== undefined && real.team2 !== null && real.team2 !== undefined
+                      return (
+                        <div key={match.id} className={`glass-panel match-card admin-card ${isFilled ? 'admin-filled' : ''}`}>
+                          <div className="match-info">Partido {match.id} | {dateStr}</div>
+                          <div className="match-teams">
+                            <div className="team">{getTeamName(match.team1_id)}</div>
+                            <input 
+                              type="number" min="0" className="team-input admin-input"
+                              value={realResults[match.id]?.team1 ?? ''}
+                              onChange={(e) => handleRealScoreChange(match.id, 'team1', e.target.value)}
+                              placeholder="-"
+                            />
+                            <span className="vs-badge">VS</span>
+                            <input 
+                              type="number" min="0" className="team-input admin-input"
+                              value={realResults[match.id]?.team2 ?? ''}
+                              onChange={(e) => handleRealScoreChange(match.id, 'team2', e.target.value)}
+                              placeholder="-"
+                            />
+                            <div className="team">{getTeamName(match.team2_id)}</div>
+                          </div>
                         </div>
-                      </div>
-                    )
-                  })}
+                      )
+                    })}
+                  </div>
+                  )}
                 </div>
-                )}
-              </div>
-            ))}
-            </section>
+              )
+            })}
+          </section>
           </>
           )}
         </>
