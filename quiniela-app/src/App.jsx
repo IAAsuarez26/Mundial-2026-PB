@@ -142,7 +142,9 @@ function App() {
       })
 
       const result = await response.json()
-      if (!response.ok) throw new Error(result.error || 'Error al guardar')
+      if (!response.ok) {
+        throw new Error(result.error || `Error del servidor (Código: ${response.status})`)
+      }
 
       // Update local matches state so ranking updates immediately
       setMatches(prev => prev.map(m => {
@@ -156,11 +158,12 @@ function App() {
       alert('¡Resultados Reales guardados exitosamente!')
     } catch (err) {
       console.error(err)
-      alert(`Error: ${err.message}`)
+      alert(`No se pudo guardar: ${err.message}`)
     } finally {
       setIsSaving(false)
     }
   }
+
 
 
 
