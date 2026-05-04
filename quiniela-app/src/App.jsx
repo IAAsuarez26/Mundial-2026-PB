@@ -464,7 +464,7 @@ function App() {
             <path d="M4.5 17.5l3.5-2" />
             <path d="M19.5 17.5l-3.5-2" />
           </svg>
-          Quiniela <span className="text-gradient">2026</span>
+          Quiniela Mundial de Fútbol <span className="text-gradient">2026</span>
         </h1>
         <div className="nav-tabs">
           <div className="tabs-center">
@@ -869,7 +869,7 @@ function App() {
         <div className="modal-overlay" onClick={() => setShowRulesModal(false)}>
           <div className="modal-content glass-panel" onClick={e => e.stopPropagation()}>
             <button className="close-modal" onClick={() => setShowRulesModal(false)}>&times;</button>
-            <h2 className="text-gradient">Reglamento Quiniela 2026</h2>
+            <h2 className="text-gradient">Reglamento Mundial de Fútbol 2026</h2>
             
             <div className="rules-section">
               <h3>⚽ Sistema de Puntuación (Fase de Grupos)</h3>
