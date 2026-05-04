@@ -129,22 +129,40 @@ function App() {
         score_team2: scores.team2
       }))
 
-      for (const res of resultsArray) {
-        await supabase.from('matches').update({
-          score_team1: res.score_team1,
-          score_team2: res.score_team2,
-          status: 'finished'
-        }).eq('id', res.match_id)
-      }
+      const response = await fetch('https://ivxvatmhgttcmyrqctos.supabase.co/functions/v1/save-results', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer sb_publishable_0AsGK4JBvD-IzmOsyj2AwQ_aQ94N0KK`
+        },
+        body: JSON.stringify({
+          password: adminPassAttempt,
+          results: resultsArray
+        })
+      })
+
+      const result = await response.json()
+      if (!response.ok) throw new Error(result.error || 'Error al guardar')
+
+      // Update local matches state so ranking updates immediately
+      setMatches(prev => prev.map(m => {
+        const updated = resultsArray.find(r => r.match_id === m.id)
+        if (updated) {
+          return { ...m, score_team1: updated.score_team1, score_team2: updated.score_team2, status: 'finished' }
+        }
+        return m
+      }))
       
       alert('¡Resultados Reales guardados exitosamente!')
     } catch (err) {
       console.error(err)
-      alert('Error al guardar resultados.')
+      alert(`Error: ${err.message}`)
     } finally {
       setIsSaving(false)
     }
   }
+
+
 
   // Save current user predictions
   const savePredictions = async () => {
