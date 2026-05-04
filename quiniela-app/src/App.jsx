@@ -60,24 +60,16 @@ function App() {
       const { data: matchesData } = await supabase.from('matches').select('*').order('id')
       if (matchesData) setMatches(matchesData)
 
-      // 3. Fetch Participantes & Predicciones
-      const { data: participantsData } = await supabase.from('participantes').select('*')
-      const { data: predsData } = await supabase.from('predicciones').select('*')
-      
-      if (participantsData && predsData) {
+      // 3. Fetch Quinielas
+      const { data: qData } = await supabase.from('quinielas').select('*')
+      if (qData) {
         const quinielasObj = {}
-        participantsData.forEach(p => {
-          const userPreds = predsData
-            .filter(pr => pr.cedula === p.cedula)
-            .reduce((acc, curr) => ({
-              ...acc,
-              [curr.match_id]: { team1: curr.score_team1, team2: curr.score_team2 }
-            }), {})
-          
-          quinielasObj[p.nombre] = {
-            cedula: p.cedula,
-            email: p.email,
-            predictions: userPreds
+        qData.forEach(q => {
+          quinielasObj[q.id] = {
+            name: q.nombre,
+            cedula: q.cedula,
+            email: q.email,
+            predictions: q.predicciones
           }
         })
         setAllQuinielas(quinielasObj)
@@ -204,34 +196,46 @@ function App() {
     setIsSaving(true)
     
     try {
-      await supabase.from('participantes').upsert({
-        cedula: userCedula.trim(),
-        nombre: userName.trim(),
-        email: userEmail.trim(),
-        updated_at: new Date().toISOString()
-      })
-
-      await supabase.from('predicciones').delete().eq('cedula', userCedula.trim())
+      // Check existing quinielas for this cedula
+      const { data: existing } = await supabase
+        .from('quinielas')
+        .select('id, nombre')
+        .eq('cedula', userCedula.trim())
       
-      const predsToInsert = Object.entries(predictions).map(([matchId, scores]) => ({
-        cedula: userCedula.trim(),
-        match_id: parseInt(matchId),
-        score_team1: scores.team1,
-        score_team2: scores.team2
-      }))
+      const toUpdate = existing?.find(q => q.nombre.trim().toLowerCase() === userName.trim().toLowerCase())
 
-      const { error } = await supabase.from('predicciones').insert(predsToInsert)
-      if (error) throw error
+      if (!toUpdate && existing && existing.length >= 3) {
+        alert("Ya tienes 3 quinielas registradas con esta cédula. No puedes crear más (puedes usar el mismo nombre para actualizar una existente).")
+        setIsSaving(false)
+        return
+      }
 
-      setAllQuinielas(prev => ({
-        ...prev,
-        [userName.trim()]: { cedula: userCedula, email: userEmail, predictions }
-      }))
-      
-      sendEmail()
+      if (toUpdate) {
+        // Update existing by ID
+        const { error } = await supabase.from('quinielas').update({
+          predicciones: predictions,
+          email: userEmail.trim(),
+          updated_at: new Date().toISOString()
+        }).eq('id', toUpdate.id)
+        if (error) throw error
+      } else {
+        // Insert new record
+        const { error } = await supabase.from('quinielas').insert({
+          nombre: userName.trim(),
+          cedula: userCedula.trim(),
+          email: userEmail.trim(),
+          predicciones: predictions
+        })
+        if (error) throw error
+      }
+
+      alert('¡Quiniela guardada exitosamente!')
+      resetForm()
+      // Optional: Refresh data from server to update ranking
+      window.location.reload() 
     } catch (err) {
       console.error(err)
-      alert("Error al guardar.")
+      alert("Error al guardar: " + (err.message || "Error desconocido"))
     } finally {
       setIsSaving(false)
     }
@@ -375,13 +379,14 @@ function App() {
     const maxPossiblePoints = playedMatchesCount * 3
 
     const scores = []
-    for (const [user, userData] of Object.entries(allQuinielas)) {
+    for (const [id, userData] of Object.entries(allQuinielas)) {
       let points = 0
       let exactMatches = 0
       let partialMatches = 0
       const matchPoints = {}
       
       const userPreds = userData.predictions
+      const userName = userData.name
 
       groupMatches.forEach(match => {
         let pts = 0
@@ -406,7 +411,7 @@ function App() {
         }
         matchPoints[match.id] = pts
       })
-      scores.push({ name: user, points, exactMatches, partialMatches, matchPoints, predictions: userPreds })
+      scores.push({ id, name: userName, points, exactMatches, partialMatches, matchPoints, predictions: userPreds })
     }
     
     return {
@@ -801,7 +806,7 @@ function App() {
                     const rankClass = place === 1 ? 'rank-1st' : place === 2 ? 'rank-2nd' : place === 3 ? 'rank-3rd' : ''
                     
                     return (
-                      <tr key={user.name} className={rankClass}>
+                      <tr key={user.id} className={rankClass}>
                         <td className="sticky-col first-col">{place}</td>
                         <td className="sticky-col second-col">{user.name}</td>
                         <td className="total-pts">{user.points}</td>
