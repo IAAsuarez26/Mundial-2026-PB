@@ -237,7 +237,14 @@ function App() {
         if (error) throw error
       }
 
-      alert('¡Quiniela guardada exitosamente!')
+      try {
+        await sendEmail()
+        alert(`¡Quiniela de "${userName.trim()}" guardada y correo enviado exitosamente!`)
+      } catch (emailErr) {
+        console.error("Email failed:", emailErr)
+        alert(`¡Quiniela de "${userName.trim()}" guardada! (Pero hubo un problema enviando el correo)`)
+      }
+      
       resetForm()
       window.location.reload() 
     } catch (err) {
@@ -269,24 +276,19 @@ function App() {
     const TEMPLATE_ID = "template_f7bm9bf"
     const PUBLIC_KEY = "XsrSuQeRlCzw5sFkJ"
 
-    if (SERVICE_ID !== "YOUR_SERVICE_ID_HERE") {
-      emailjs.send(SERVICE_ID, TEMPLATE_ID, templateParams, PUBLIC_KEY)
-        .then((response) => {
-           console.log('SUCCESS!', response.status, response.text);
-           alert(`¡Predicciones de ${userName} guardadas y correo enviado exitosamente!`);
-           resetForm();
-        }, (err) => {
-           console.log('FAILED...', err);
-           alert(`¡Predicciones guardadas! (Pero hubo un error enviando el correo)`);
-           resetForm();
-        })
-        .finally(() => setIsSaving(false));
-    } else {
-      alert(`¡Predicciones de ${userName} guardadas exitosamente!`)
-      resetForm();
-      setIsSaving(false)
+    if (SERVICE_ID === "YOUR_SERVICE_ID_HERE") {
+      return Promise.resolve()
     }
+
+    return emailjs.send(SERVICE_ID, TEMPLATE_ID, templateParams, PUBLIC_KEY)
+      .then((response) => {
+         console.log('SUCCESS!', response.status, response.text);
+      }, (err) => {
+         console.log('FAILED...', err);
+         throw err
+      });
   }
+
 
   const resetForm = () => {
     setUserName('')
