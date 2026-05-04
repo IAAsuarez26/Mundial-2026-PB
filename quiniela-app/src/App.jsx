@@ -929,7 +929,7 @@ function App() {
               <div className="manual-step">
                 <div className="step-num">3</div>
                 <div className="step-text">
-                  <strong>Tablas de Posiciones:</strong> A medida que llenas los goles, las tablas de grupos se actualizarán automáticamente. Revisa que tus equipos favoritos queden en la posición deseada.
+                  <strong>Tablas de Posiciones:</strong> A medida que llenas los goles, las tablas se actualizarán automáticamente. Revisa que tus equipos favoritos queden en la posición deseada <strong>antes de guardar</strong>, ya que al presionar el botón de guardado el formulario se enviará y se limpiará para un nuevo registro.
                 </div>
               </div>
               <div className="manual-step">
