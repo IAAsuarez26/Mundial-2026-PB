@@ -24,10 +24,18 @@
 
 /* Nav Tabs */
 .nav-tabs {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 1.5rem;
+  padding: 0 1rem;
+}
+
+.tabs-center {
   display: flex;
   justify-content: center;
   gap: 1rem;
-  margin-top: 1.5rem;
   flex-wrap: wrap;
 }
 
@@ -509,9 +517,10 @@
 }
 
 .rules-btn {
+  position: absolute;
+  right: 0;
   background: rgba(255, 255, 255, 0.1) !important;
   color: #fff !important;
-  margin-left: auto !important;
 }
 
 .rules-btn:hover {

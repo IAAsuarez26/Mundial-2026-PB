@@ -467,9 +467,11 @@ function App() {
           Quiniela <span className="text-gradient">2026</span>
         </h1>
         <div className="nav-tabs">
-          <button className={`tab-btn ${currentView === 'predict' ? 'active' : ''}`} onClick={() => setCurrentView('predict')}>Mis Predicciones</button>
-          <button className={`tab-btn ${currentView === 'ranking' ? 'active' : ''}`} onClick={() => setCurrentView('ranking')}>Ranking</button>
-          <button className={`tab-btn ${currentView === 'admin' ? 'active' : ''}`} onClick={() => setCurrentView('admin')}>Administrador</button>
+          <div className="tabs-center">
+            <button className={`tab-btn ${currentView === 'predict' ? 'active' : ''}`} onClick={() => setCurrentView('predict')}>Mis Predicciones</button>
+            <button className={`tab-btn ${currentView === 'ranking' ? 'active' : ''}`} onClick={() => setCurrentView('ranking')}>Ranking</button>
+            <button className={`tab-btn ${currentView === 'admin' ? 'active' : ''}`} onClick={() => setCurrentView('admin')}>Administrador</button>
+          </div>
           <button className="tab-btn rules-btn" onClick={() => setShowRulesModal(true)}>📜 Reglamento</button>
         </div>
       </header>
