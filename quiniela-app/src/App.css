@@ -300,9 +300,10 @@
 
 /* Ranking Specific */
 .ranking-section {
-  max-width: 800px;
+  max-width: 100%;
   margin: 0 auto;
 }
+
 
 .ranking-table {
   display: flex;
