@@ -293,6 +293,11 @@
   box-shadow: 0 0 12px rgba(46, 204, 113, 0.2);
 }
 
+.prediction-filled {
+  border: 1px solid #2ecc71;
+  box-shadow: 0 0 12px rgba(46, 204, 113, 0.2);
+}
+
 .admin-input:focus {
   border-color: var(--accent);
   box-shadow: 0 0 15px rgba(255, 75, 43, 0.3);

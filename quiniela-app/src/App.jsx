@@ -574,8 +574,11 @@ function App() {
                     {jornadaMatches.map((match, idx) => {
                       const dateStr = match.date ? new Date(match.date).toLocaleDateString() : 'TBD'
                       const started = isMatchStarted(match.date)
+                      const pred = predictions[match.id]
+                      const isFilled = pred && pred.team1 !== null && pred.team1 !== undefined && pred.team1 !== '' && pred.team2 !== null && pred.team2 !== undefined && pred.team2 !== ''
+                      
                       return (
-                        <div key={match.id} className={`glass-panel match-card ${started ? 'match-started' : ''}`} style={{ animationDelay: `${(idx % 10) * 0.05}s` }}>
+                        <div key={match.id} className={`glass-panel match-card ${started ? 'match-started' : ''} ${isFilled ? 'prediction-filled' : ''}`} style={{ animationDelay: `${(idx % 10) * 0.05}s` }}>
                           <div className="match-info">
                             Partido {match.id} | {dateStr} {started && <span className="started-badge">Iniciado / Finalizado</span>}
                           </div>
