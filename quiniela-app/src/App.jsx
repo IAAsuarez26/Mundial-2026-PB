@@ -123,11 +123,20 @@ function App() {
   const saveRealResults = async () => {
     setIsSaving(true)
     try {
-      const resultsArray = Object.entries(realResults).map(([id, scores]) => ({
-        match_id: parseInt(id),
-        score_team1: scores.team1,
-        score_team2: scores.team2
-      }))
+      const resultsArray = Object.entries(realResults)
+        .filter(([id, scores]) => scores.team1 !== null && scores.team1 !== undefined && scores.team1 !== '' && 
+                                  scores.team2 !== null && scores.team2 !== undefined && scores.team2 !== '')
+        .map(([id, scores]) => ({
+          match_id: parseInt(id),
+          score_team1: scores.team1,
+          score_team2: scores.team2
+        }))
+
+      if (resultsArray.length === 0) {
+        alert("No hay resultados completos para guardar (asegúrate de ingresar ambos goles del partido).")
+        setIsSaving(false)
+        return
+      }
 
       const response = await fetch('https://ivxvatmhgttcmyrqctos.supabase.co/functions/v1/save-results', {
         method: 'POST',
