@@ -269,6 +269,15 @@ function App() {
       }
     })
 
+    message += `\nPOSICIONES PROYECTADAS POR GRUPO:\n`
+    message += `--------------------------------\n`
+    Object.entries(groupStandings).forEach(([groupName, teams]) => {
+      message += `\nGRUPO ${groupName}:\n`
+      teams.forEach((team, index) => {
+        message += `${index + 1}. ${team.name} - ${team.points} pts (DG: ${team.goalDiff > 0 ? '+' : ''}${team.goalDiff})\n`
+      })
+    })
+
     const templateParams = {
       to_name: userName,
       to_email: userEmail.trim(),
