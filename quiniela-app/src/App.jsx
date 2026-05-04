@@ -196,7 +196,15 @@ function App() {
     setIsSaving(true)
     
     try {
-      // Check existing quinielas for this cedula
+      // 1. Ensure the participant profile exists or is updated
+      await supabase.from('participantes').upsert({
+        cedula: userCedula.trim(),
+        nombre: userName.trim(),
+        email: userEmail.trim(),
+        updated_at: new Date().toISOString()
+      })
+
+      // 2. Check existing quinielas for this cedula
       const { data: existing } = await supabase
         .from('quinielas')
         .select('id, nombre')
@@ -211,7 +219,7 @@ function App() {
       }
 
       if (toUpdate) {
-        // Update existing by ID
+        // Update existing quiniela entry
         const { error } = await supabase.from('quinielas').update({
           predicciones: predictions,
           email: userEmail.trim(),
@@ -219,7 +227,7 @@ function App() {
         }).eq('id', toUpdate.id)
         if (error) throw error
       } else {
-        // Insert new record
+        // Insert new quiniela entry
         const { error } = await supabase.from('quinielas').insert({
           nombre: userName.trim(),
           cedula: userCedula.trim(),
@@ -231,9 +239,9 @@ function App() {
 
       alert('¡Quiniela guardada exitosamente!')
       resetForm()
-      // Optional: Refresh data from server to update ranking
       window.location.reload() 
     } catch (err) {
+
       console.error(err)
       alert("Error al guardar: " + (err.message || "Error desconocido"))
     } finally {
