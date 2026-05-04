@@ -341,6 +341,77 @@
   background: rgba(231, 76, 60, 0.1);
 }
 
+/* Consolidated Table Styles */
+.consolidated-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.9rem;
+}
+
+.consolidated-table th, 
+.consolidated-table td {
+  padding: 0.75rem 0.5rem;
+  text-align: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  min-width: 40px;
+}
+
+.consolidated-table thead th {
+  background: rgba(10, 15, 30, 0.95);
+  color: var(--primary-color);
+  font-weight: 700;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.consolidated-table .sticky-col {
+  position: sticky;
+  left: 0;
+  z-index: 20;
+  background: rgba(10, 15, 30, 0.95);
+  border-right: 1px solid rgba(0, 242, 254, 0.2);
+}
+
+.consolidated-table .first-col {
+  left: 0;
+  min-width: 50px;
+}
+
+.consolidated-table .second-col {
+  left: 50px;
+  min-width: 150px;
+  text-align: left;
+  padding-left: 1rem;
+}
+
+.consolidated-table tr:hover td {
+  background: rgba(0, 242, 254, 0.05);
+}
+
+.consolidated-table .total-pts {
+  font-weight: 800;
+  color: var(--primary-color);
+  font-size: 1rem;
+}
+
+.consolidated-table .pts-3 {
+  background: rgba(0, 255, 136, 0.2);
+  color: #00ff88;
+  font-weight: bold;
+}
+
+.consolidated-table .pts-1 {
+  background: rgba(255, 204, 0, 0.1);
+  color: #ffcc00;
+}
+
+.rank-1st .rank-number, .rank-1st .first-col, .rank-1st .second-col { color: #ffd700; font-weight: 900; }
+.rank-2nd .rank-number, .rank-2nd .first-col, .rank-2nd .second-col { color: #c0c0c0; font-weight: 900; }
+.rank-3rd .rank-number, .rank-3rd .first-col, .rank-3rd .second-col { color: #cd7f32; font-weight: 900; }
+
+
 .rank-number {
   font-size: 1.5rem;
   font-weight: 800;

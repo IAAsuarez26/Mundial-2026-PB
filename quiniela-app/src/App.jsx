@@ -379,16 +379,19 @@ function App() {
       let points = 0
       let exactMatches = 0
       let partialMatches = 0
+      const matchPoints = {}
       
       const userPreds = userData.predictions
 
       groupMatches.forEach(match => {
+        let pts = 0
         const real1 = match.score_team1
         const real2 = match.score_team2
         const pred = userPreds[match.id]
         
         if (real1 !== null && real2 !== null && pred && pred.team1 !== null && pred.team2 !== null) {
             if (real1 === pred.team1 && real2 === pred.team2) {
+              pts = 3
               points += 3
               exactMatches += 1
             } else if (
@@ -396,12 +399,14 @@ function App() {
               (real1 < real2 && pred.team1 < pred.team2) ||
               (real1 === real2 && pred.team1 === pred.team2)
             ) {
+              pts = 1
               points += 1
               partialMatches += 1
             }
         }
+        matchPoints[match.id] = pts
       })
-      scores.push({ user, points, exactMatches, partialMatches })
+      scores.push({ user, points, exactMatches, partialMatches, matchPoints })
     }
     
     return {
@@ -409,6 +414,7 @@ function App() {
       remainingMatches,
       maxPossiblePoints,
       totalGroupMatches,
+      groupMatches, // Exporting this for the table headers
       scores: scores.sort((a, b) => b.points - a.points)
     }
   }, [allQuinielas, matches, realResults])
@@ -769,31 +775,52 @@ function App() {
             </div>
           </div>
 
-          <div className="ranking-table glass-panel">
+          <div className="ranking-container glass-panel" style={{ overflowX: 'auto', padding: '0' }}>
             {rankingInfo.scores.length === 0 ? (
               <p style={{textAlign: 'center', padding: '2rem'}}>Aún no hay quinielas registradas.</p>
             ) : (
-              rankingInfo.scores.map((user, idx) => {
-                // Determine place based on distinct point values (ties share the same place)
-                const distinctPoints = [...new Set(rankingInfo.scores.map(s => s.points))]
-                const place = distinctPoints.indexOf(user.points) + 1
-                const rankClass = place === 1 ? 'rank-1st' : place === 2 ? 'rank-2nd' : place === 3 ? 'rank-3rd' : ''
-                return (
-                <div key={user.user} className={`ranking-row ${rankClass}`}>
-                  <div className="rank-number">#{place}</div>
-                  <div className="rank-name">
-                    {user.user}
-                    <div style={{fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 400}}>
-                      Exactos: {user.exactMatches} | Parciales: {user.partialMatches}
-                    </div>
-                  </div>
-                  <div className="rank-points">
-                    <span style={{fontSize: '1rem', fontWeight: 400, marginRight: '10px'}}>Total Conseguidos:</span>
-                    {user.points} pts
-                  </div>
-                </div>
-                )
-              })
+              <table className="consolidated-table">
+                <thead>
+                  <tr>
+                    <th className="sticky-col first-col">Pos</th>
+                    <th className="sticky-col second-col">Participante</th>
+                    <th>Total</th>
+                    <th>Ex</th>
+                    <th>Pa</th>
+                    {rankingInfo.groupMatches.map(m => (
+                      <th key={m.id} title={`${getTeamName(m.team1_id)} vs ${getTeamName(m.team2_id)}`}>
+                        P{m.id}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {rankingInfo.scores.map((user, idx) => {
+                    const distinctPoints = [...new Set(rankingInfo.scores.map(s => s.points))]
+                    const place = distinctPoints.indexOf(user.points) + 1
+                    const rankClass = place === 1 ? 'rank-1st' : place === 2 ? 'rank-2nd' : place === 3 ? 'rank-3rd' : ''
+                    
+                    return (
+                      <tr key={user.user} className={rankClass}>
+                        <td className="sticky-col first-col">{place}</td>
+                        <td className="sticky-col second-col">{user.user}</td>
+                        <td className="total-pts">{user.points}</td>
+                        <td>{user.exactMatches}</td>
+                        <td>{user.partialMatches}</td>
+                        {rankingInfo.groupMatches.map(m => {
+                          const pts = user.matchPoints[m.id] || 0
+                          const ptsClass = pts === 3 ? 'pts-3' : pts === 1 ? 'pts-1' : ''
+                          return (
+                            <td key={m.id} className={ptsClass}>
+                              {pts}
+                            </td>
+                          )
+                        })}
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
             )}
           </div>
         </section>
