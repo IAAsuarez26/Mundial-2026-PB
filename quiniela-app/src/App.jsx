@@ -386,7 +386,7 @@ function App() {
 
     const totalGroupMatches = groupMatches.length
     const remainingMatches = totalGroupMatches - playedMatchesCount
-    const maxPossiblePoints = playedMatchesCount * 3
+    const maxPossiblePoints = playedMatchesCount * 5
 
     const scores = []
     for (const [id, userData] of Object.entries(allQuinielas)) {
@@ -405,19 +405,22 @@ function App() {
         const pred = userPreds[match.id]
         
         if (real1 !== null && real2 !== null && pred && pred.team1 !== null && pred.team2 !== null) {
+            const realDiff = real1 - real2
+            const predDiff = pred.team1 - pred.team2
+            const realSign = Math.sign(realDiff)
+            const predSign = Math.sign(predDiff)
+
             if (real1 === pred.team1 && real2 === pred.team2) {
-              pts = 3
-              points += 3
+              pts = 5
               exactMatches += 1
-            } else if (
-              (real1 > real2 && pred.team1 > pred.team2) ||
-              (real1 < real2 && pred.team1 < pred.team2) ||
-              (real1 === real2 && pred.team1 === pred.team2)
-            ) {
+            } else if (realDiff === predDiff) {
+              pts = 3
+              partialMatches += 1
+            } else if (realSign === predSign) {
               pts = 1
-              points += 1
               partialMatches += 1
             }
+            points += pts
         }
         matchPoints[match.id] = pts
       })
@@ -831,7 +834,10 @@ function App() {
                           const isFinished = m.score_team1 !== null && m.score_team2 !== null
                           let ptsClass = ''
                           if (isFinished) {
-                            ptsClass = pts === 3 ? 'pts-3' : pts === 1 ? 'pts-1' : 'pts-0'
+                            if (pts === 5) ptsClass = 'pts-5'
+                            else if (pts === 3) ptsClass = 'pts-3'
+                            else if (pts === 1) ptsClass = 'pts-1'
+                            else ptsClass = 'pts-0'
                           }
                           const scoreText = pred ? `${pred.team1}-${pred.team2}` : '-'
                           

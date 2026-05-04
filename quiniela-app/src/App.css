@@ -403,10 +403,15 @@
   font-size: 1rem;
 }
 
+.consolidated-table .pts-5 {
+  background: rgba(46, 204, 113, 0.3);
+  color: #2ecc71;
+  font-weight: 900;
+}
+
 .consolidated-table .pts-3 {
-  background: rgba(0, 255, 136, 0.2);
-  color: #00ff88;
-  font-weight: bold;
+  background: rgba(46, 204, 113, 0.15);
+  color: #2ecc71;
 }
 
 .consolidated-table .pts-1 {
