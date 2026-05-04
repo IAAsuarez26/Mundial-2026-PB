@@ -31,6 +31,7 @@ function App() {
   const [adminPassAttempt, setAdminPassAttempt] = useState('')
   const [isSaving, setIsSaving] = useState(false)
   const [showRulesModal, setShowRulesModal] = useState(false)
+  const [showManualModal, setShowManualModal] = useState(false)
 
   const toggleJornada = (jornadaName) => {
     setExpandedJornadas(prev => ({ ...prev, [jornadaName]: !prev[jornadaName] }))
@@ -471,6 +472,7 @@ function App() {
             <button className={`tab-btn ${currentView === 'predict' ? 'active' : ''}`} onClick={() => setCurrentView('predict')}>Mis Predicciones</button>
             <button className={`tab-btn ${currentView === 'ranking' ? 'active' : ''}`} onClick={() => setCurrentView('ranking')}>Ranking</button>
             <button className={`tab-btn ${currentView === 'admin' ? 'active' : ''}`} onClick={() => setCurrentView('admin')}>Administrador</button>
+            <button className="tab-btn manual-btn" onClick={() => setShowManualModal(true)}>📖 Manual</button>
           </div>
           <button className="tab-btn rules-btn" onClick={() => setShowRulesModal(true)}>📜 Reglamento</button>
         </div>
@@ -900,6 +902,51 @@ function App() {
             </div>
 
             <button className="btn-primary" onClick={() => setShowRulesModal(false)} style={{width: '100%', marginTop: '1rem'}}>Entendido</button>
+          </div>
+        </div>
+      )}
+
+      {/* Manual Modal */}
+      {showManualModal && (
+        <div className="modal-overlay" onClick={() => setShowManualModal(false)}>
+          <div className="modal-content glass-panel" onClick={e => e.stopPropagation()}>
+            <button className="close-modal" onClick={() => setShowManualModal(false)}>&times;</button>
+            <h2 className="text-gradient">Guía de Llenado Correcto</h2>
+            
+            <div className="rules-section">
+              <div className="manual-step">
+                <div className="step-num">1</div>
+                <div className="step-text">
+                  <strong>Identificación:</strong> Ingresa tu Cédula, Nombre (o apodo) y Correo Electrónico. Recuerda que el correo es vital para recibir tu comprobante.
+                </div>
+              </div>
+              <div className="manual-step">
+                <div className="step-num">2</div>
+                <div className="step-text">
+                  <strong>Pronósticos:</strong> Coloca los goles en los cuadros blancos. Los bordes de la tarjeta se pondrán <span style={{color: '#2ecc71', fontWeight: 'bold'}}>Verdes</span> cuando hayas completado ambos campos de un partido.
+                </div>
+              </div>
+              <div className="manual-step">
+                <div className="step-num">3</div>
+                <div className="step-text">
+                  <strong>Tablas de Posiciones:</strong> A medida que llenas los goles, las tablas de grupos se actualizarán automáticamente. Revisa que tus equipos favoritos queden en la posición deseada.
+                </div>
+              </div>
+              <div className="manual-step">
+                <div className="step-num">4</div>
+                <div className="step-text">
+                  <strong>Guardar:</strong> Al finalizar los 72 partidos de la Fase de Grupos, haz clic en el botón <span style={{color: 'var(--primary-color)', fontWeight: 'bold'}}>"Guardar mi Quiniela"</span>.
+                </div>
+              </div>
+              <div className="manual-step">
+                <div className="step-num">5</div>
+                <div className="step-text">
+                  <strong>Confirmación:</strong> Espera el mensaje de éxito. Recibirás un correo con el detalle de todos tus pronósticos para tu control personal.
+                </div>
+              </div>
+            </div>
+
+            <button className="btn-primary" onClick={() => setShowManualModal(false)} style={{width: '100%', marginTop: '1rem'}}>¡Listo, a jugar!</button>
           </div>
         </div>
       )}

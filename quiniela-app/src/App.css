@@ -602,3 +602,35 @@
     transform: translateY(0);
   }
 }
+
+/* Manual Modal Styles */
+.manual-step {
+  display: flex;
+  gap: 1.5rem;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.step-num {
+  background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  color: white;
+  box-shadow: 0 4px 10px rgba(0, 242, 254, 0.3);
+}
+
+.step-text {
+  color: var(--text-main);
+  line-height: 1.5;
+  font-size: 0.95rem;
+}
