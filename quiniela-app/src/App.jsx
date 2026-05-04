@@ -406,7 +406,7 @@ function App() {
         }
         matchPoints[match.id] = pts
       })
-      scores.push({ user, points, exactMatches, partialMatches, matchPoints })
+      scores.push({ name: user, points, exactMatches, partialMatches, matchPoints, predictions: userPreds })
     }
     
     return {
@@ -801,9 +801,9 @@ function App() {
                     const rankClass = place === 1 ? 'rank-1st' : place === 2 ? 'rank-2nd' : place === 3 ? 'rank-3rd' : ''
                     
                     return (
-                      <tr key={user.user} className={rankClass}>
+                      <tr key={user.name} className={rankClass}>
                         <td className="sticky-col first-col">{place}</td>
-                        <td className="sticky-col second-col">{user.user}</td>
+                        <td className="sticky-col second-col">{user.name}</td>
                         <td className="total-pts">{user.points}</td>
                         <td>{user.exactMatches}</td>
                         <td>{user.partialMatches}</td>
