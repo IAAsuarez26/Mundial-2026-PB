@@ -1,3 +1,4 @@
+// Quiniela Mundial 2026 - v1.0.1 - Despliegue con Autor Corregido
 import { useState, useEffect, useMemo } from 'react'
 import emailjs from '@emailjs/browser'
 import { supabase } from './supabaseClient'
