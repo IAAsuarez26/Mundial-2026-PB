@@ -809,13 +809,18 @@ function App() {
                         <td>{user.partialMatches}</td>
                         {rankingInfo.groupMatches.map(m => {
                           const pts = user.matchPoints[m.id] || 0
+                          const pred = user.predictions[m.id]
                           const ptsClass = pts === 3 ? 'pts-3' : pts === 1 ? 'pts-1' : ''
+                          const scoreText = pred ? `${pred.team1}-${pred.team2}` : '-'
+                          
                           return (
                             <td key={m.id} className={ptsClass}>
-                              {pts}
+                              <div style={{fontSize: '0.8rem'}}>{scoreText}</div>
+                              {pts > 0 && <div style={{fontSize: '0.7rem', fontWeight: 800}}>({pts})</div>}
                             </td>
                           )
                         })}
+
                       </tr>
                     )
                   })}

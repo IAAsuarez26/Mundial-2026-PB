@@ -351,11 +351,12 @@
 
 .consolidated-table th, 
 .consolidated-table td {
-  padding: 0.75rem 0.5rem;
+  padding: 0.5rem 0.25rem;
   text-align: center;
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-  min-width: 40px;
+  min-width: 65px;
 }
+
 
 .consolidated-table thead th {
   background: rgba(10, 15, 30, 0.95);
