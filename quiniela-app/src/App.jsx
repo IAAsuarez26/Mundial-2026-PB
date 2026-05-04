@@ -29,6 +29,7 @@ function App() {
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false)
   const [adminPassAttempt, setAdminPassAttempt] = useState('')
   const [isSaving, setIsSaving] = useState(false)
+  const [showRulesModal, setShowRulesModal] = useState(false)
 
   const toggleJornada = (jornadaName) => {
     setExpandedJornadas(prev => ({ ...prev, [jornadaName]: !prev[jornadaName] }))
@@ -468,6 +469,7 @@ function App() {
           <button className={`tab-btn ${currentView === 'predict' ? 'active' : ''}`} onClick={() => setCurrentView('predict')}>Mis Predicciones</button>
           <button className={`tab-btn ${currentView === 'ranking' ? 'active' : ''}`} onClick={() => setCurrentView('ranking')}>Ranking</button>
           <button className={`tab-btn ${currentView === 'admin' ? 'active' : ''}`} onClick={() => setCurrentView('admin')}>Administrador</button>
+          <button className="tab-btn rules-btn" onClick={() => setShowRulesModal(true)}>📜 Reglamento</button>
         </div>
       </header>
 
@@ -849,8 +851,6 @@ function App() {
                             </td>
                           )
                         })}
-
-
                       </tr>
                     )
                   })}
@@ -859,6 +859,46 @@ function App() {
             )}
           </div>
         </section>
+      )}
+
+      {/* Rules Modal */}
+      {showRulesModal && (
+        <div className="modal-overlay" onClick={() => setShowRulesModal(false)}>
+          <div className="modal-content glass-panel" onClick={e => e.stopPropagation()}>
+            <button className="close-modal" onClick={() => setShowRulesModal(false)}>&times;</button>
+            <h2 className="text-gradient">Reglamento Quiniela 2026</h2>
+            
+            <div className="rules-section">
+              <h3>⚽ Sistema de Puntuación (Fase de Grupos)</h3>
+              <div className="rules-grid">
+                <div className="rule-card pts-5">
+                  <div className="rule-pts">5 Pts</div>
+                  <div className="rule-desc"><strong>Resultado Exacto:</strong> Acertar el marcador idéntico del partido.</div>
+                </div>
+                <div className="rule-card pts-3">
+                  <div className="rule-pts">3 Pts</div>
+                  <div className="rule-desc"><strong>Ganador y Diferencia:</strong> Acertar el ganador y la diferencia de goles, o empate no exacto.</div>
+                </div>
+                <div className="rule-card pts-1">
+                  <div className="rule-pts">1 Pt</div>
+                  <div className="rule-desc"><strong>Tendencia:</strong> Acertar únicamente el equipo ganador (o empate) pero fallar en la diferencia.</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="rules-section">
+              <h3>📋 Condiciones Generales</h3>
+              <ul>
+                <li>Se permite un máximo de <strong>3 quinielas</strong> por participante (usando la misma cédula pero distinto apodo).</li>
+                <li>Los pronósticos se pueden modificar hasta el inicio de cada partido.</li>
+                <li>En caso de empate en puntos en el ranking, la posición se definirá por mayor número de marcadores exactos.</li>
+                <li>La transparencia es total: todos pueden ver los pronósticos de los demás en la pestaña de Ranking.</li>
+              </ul>
+            </div>
+
+            <button className="btn-primary" onClick={() => setShowRulesModal(false)} style={{width: '100%', marginTop: '1rem'}}>Entendido</button>
+          </div>
+        </div>
       )}
     </div>
   )
