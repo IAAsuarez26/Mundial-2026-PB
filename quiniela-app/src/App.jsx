@@ -272,11 +272,11 @@ function App() {
       message: message
     }
 
-    const SERVICE_ID = "service_ubo7w6k"
-    const TEMPLATE_ID = "template_f7bm9bf"
-    const PUBLIC_KEY = "XsrSuQeRlCzw5sFkJ"
+    const SERVICE_ID = import.meta.env.VITE_EMAILJS_SERVICE_ID
+    const TEMPLATE_ID = import.meta.env.VITE_EMAILJS_TEMPLATE_ID
+    const PUBLIC_KEY = import.meta.env.VITE_EMAILJS_PUBLIC_KEY
 
-    if (SERVICE_ID === "YOUR_SERVICE_ID_HERE") {
+    if (!SERVICE_ID || SERVICE_ID === "YOUR_SERVICE_ID_HERE") {
       return Promise.resolve()
     }
 
