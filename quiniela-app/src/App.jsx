@@ -458,21 +458,21 @@ function App() {
           <img 
             src={trophyImg} 
             alt="Copa del Mundo" 
-            style={{ width: '100%', height: 'auto', display: 'block', opacity: '0.95' }}
+            style={{ width: '100%', height: 'auto', display: 'block', opacity: '0.95', pointerEvents: 'none' }}
           />
         </div>
         <div className="banner-item glass-panel" style={{ width: '25%', overflow: 'hidden', border: '1px solid rgba(0, 242, 254, 0.3)', boxShadow: '0 10px 40px rgba(0, 0, 0, 0.6)' }}>
           <img 
             src="https://images.unsplash.com/photo-1579952363873-27f3bade9f55?q=80&w=1600&auto=format&fit=crop" 
             alt="Botín y Balón" 
-            style={{ width: '100%', height: 'auto', display: 'block', opacity: '0.9' }}
+            style={{ width: '100%', height: 'auto', display: 'block', opacity: '0.9', pointerEvents: 'none' }}
           />
         </div>
         <div className="banner-item float-anim" style={{ width: '25%', display: 'flex', justifyContent: 'center', alignItems: 'center', animationDelay: '1s' }}>
           <img 
             src={mascotImg} 
             alt="Mascotas Mundial 2026" 
-            style={{ width: '100%', height: 'auto', display: 'block', opacity: '0.95' }}
+            style={{ width: '100%', height: 'auto', display: 'block', opacity: '0.95', pointerEvents: 'none' }}
           />
         </div>
       </div>
