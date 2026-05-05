@@ -634,3 +634,107 @@
   line-height: 1.5;
   font-size: 0.95rem;
 }
+
+/* Responsive Design for Android & iOS */
+@media (max-width: 768px) {
+  .app-container {
+    padding: 1rem 0.5rem;
+  }
+
+  .banner-triptych {
+    flex-direction: column;
+    gap: 1rem !important;
+    margin-bottom: 1.5rem !important;
+  }
+
+  .banner-item {
+    width: 80% !important;
+  }
+
+  .header h1 {
+    font-size: 1.8rem;
+    flex-wrap: wrap;
+    text-align: center;
+  }
+
+  .header p {
+    font-size: 1rem;
+    padding: 0 1rem;
+  }
+
+  .nav-tabs {
+    flex-direction: column;
+  }
+
+  .tabs-center {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .tab-btn {
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
+
+  .rules-btn {
+    position: static;
+    width: 100%;
+    margin-top: 0.5rem;
+  }
+
+  .user-input-section {
+    flex-direction: column;
+  }
+
+  .user-name-input {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .groups-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .group-card {
+    padding: 1rem;
+  }
+
+  .matches-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .match-card {
+    padding: 1rem;
+  }
+
+  .team-stats {
+    grid-template-columns: repeat(7, 20px) 35px;
+    gap: 2px;
+  }
+  
+  .stat-label, .stat-val {
+    font-size: 0.65rem;
+  }
+
+  .team-name, .team {
+    font-size: 0.8rem;
+    padding-right: 5px;
+  }
+
+  .team-input {
+    width: 40px;
+    height: 40px;
+    font-size: 1rem;
+  }
+
+  .modal-content {
+    padding: 1.5rem 1rem;
+  }
+
+  .stats-dashboard {
+    flex-direction: column;
+  }
+}
+
