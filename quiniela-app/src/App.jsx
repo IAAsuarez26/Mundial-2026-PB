@@ -923,7 +923,6 @@ function App() {
               <ul>
                 <li>Se permite un máximo de <strong>3 quinielas</strong> por participante (usando el mismo documento de identidad pero distinto apodo).</li>
                 <li>Los pronósticos se pueden modificar hasta el inicio de cada partido.</li>
-                <li>En caso de empate en puntos en el ranking, la posición se definirá por mayor número de marcadores exactos.</li>
                 <li>La transparencia es total: todos pueden ver los pronósticos de los demás en la pestaña de Ranking.</li>
               </ul>
             </div>
