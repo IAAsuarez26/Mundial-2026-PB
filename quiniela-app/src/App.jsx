@@ -922,7 +922,7 @@ function App() {
               <h3>📋 Condiciones Generales</h3>
               <ul>
                 <li>Se permite un máximo de <strong>3 quinielas</strong> por participante (usando el mismo documento de identidad pero distinto apodo).</li>
-                <li>Los pronósticos se pueden modificar hasta el inicio de cada partido.</li>
+                <li>Los pronósticos se pueden realizar hasta 24 horas antes del primer partido del Mundial.</li>
                 <li>La transparencia es total: todos pueden ver los pronósticos de los demás en la pestaña de Ranking.</li>
               </ul>
             </div>
