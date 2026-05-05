@@ -677,9 +677,10 @@
   }
 
   .rules-btn {
-    position: static;
-    width: 100%;
-    margin-top: 0.5rem;
+    position: static !important;
+    width: 100% !important;
+    margin-top: 0.5rem !important;
+    right: auto !important;
   }
 
   .user-input-section {
