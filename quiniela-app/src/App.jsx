@@ -3,6 +3,8 @@ import { useState, useEffect, useMemo } from 'react'
 import emailjs from '@emailjs/browser'
 import { supabase } from './supabaseClient'
 import './App.css'
+import trophyImg from './assets/trophy.png'
+import mascotImg from './assets/mascot.png'
 // import data from './data.json' // Removed local data dependency
 
 
@@ -451,18 +453,29 @@ function App() {
 
   return (
     <div className="app-container">
-      <div 
-        className="banner-image glass-panel" 
-        style={{ 
-          width: '100%', 
-          height: '250px', 
-          backgroundImage: 'url("https://images.unsplash.com/photo-1579952363873-27f3bade9f55?q=50&w=1200&auto=format&fit=crop")', 
-          backgroundSize: 'cover', 
-          backgroundPosition: 'center', 
-          marginBottom: '2rem',
-          border: '1px solid rgba(0, 242, 254, 0.3)'
-        }}
-      ></div>
+      <div className="banner-triptych" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '2rem', marginBottom: '2.5rem', width: '100%' }}>
+        <div className="banner-item glass-panel" style={{ width: '25%', overflow: 'hidden', border: '1px solid rgba(0, 242, 254, 0.3)', boxShadow: '0 10px 40px rgba(0, 0, 0, 0.6)' }}>
+          <img 
+            src={trophyImg} 
+            alt="Copa del Mundo" 
+            style={{ width: '100%', height: 'auto', display: 'block', opacity: '0.9' }}
+          />
+        </div>
+        <div className="banner-item glass-panel" style={{ width: '25%', overflow: 'hidden', border: '1px solid rgba(0, 242, 254, 0.3)', boxShadow: '0 10px 40px rgba(0, 0, 0, 0.6)' }}>
+          <img 
+            src="https://images.unsplash.com/photo-1579952363873-27f3bade9f55?q=80&w=1600&auto=format&fit=crop" 
+            alt="Botín y Balón" 
+            style={{ width: '100%', height: 'auto', display: 'block', opacity: '0.9' }}
+          />
+        </div>
+        <div className="banner-item glass-panel" style={{ width: '25%', overflow: 'hidden', border: '1px solid rgba(0, 242, 254, 0.3)', boxShadow: '0 10px 40px rgba(0, 0, 0, 0.6)' }}>
+          <img 
+            src={mascotImg} 
+            alt="Mascotas Mundial 2026" 
+            style={{ width: '100%', height: 'auto', display: 'block', opacity: '0.9' }}
+          />
+        </div>
+      </div>
       <header className="header">
         <h1 style={{display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '15px'}}>
           <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{color: 'var(--primary-color)'}}>
