@@ -620,6 +620,7 @@ function App() {
                               type="number" min="0" className="team-input"
                               value={predictions[match.id]?.team1 ?? ''}
                               onChange={(e) => handleScoreChange(match.id, 'team1', e.target.value)}
+                              onKeyDown={(e) => ['e', 'E', '+', '-', '.', ','].includes(e.key) && e.preventDefault()}
                               placeholder="0"
                               disabled={started}
                             />
@@ -628,6 +629,7 @@ function App() {
                               type="number" min="0" className="team-input"
                               value={predictions[match.id]?.team2 ?? ''}
                               onChange={(e) => handleScoreChange(match.id, 'team2', e.target.value)}
+                              onKeyDown={(e) => ['e', 'E', '+', '-', '.', ','].includes(e.key) && e.preventDefault()}
                               placeholder="0"
                               disabled={started}
                             />
@@ -779,6 +781,7 @@ function App() {
                               type="number" min="0" className="team-input admin-input"
                               value={realResults[match.id]?.team1 ?? ''}
                               onChange={(e) => handleRealScoreChange(match.id, 'team1', e.target.value)}
+                              onKeyDown={(e) => ['e', 'E', '+', '-', '.', ','].includes(e.key) && e.preventDefault()}
                               placeholder="-"
                             />
                             <span className="vs-badge">VS</span>
@@ -786,6 +789,7 @@ function App() {
                               type="number" min="0" className="team-input admin-input"
                               value={realResults[match.id]?.team2 ?? ''}
                               onChange={(e) => handleRealScoreChange(match.id, 'team2', e.target.value)}
+                              onKeyDown={(e) => ['e', 'E', '+', '-', '.', ','].includes(e.key) && e.preventDefault()}
                               placeholder="-"
                             />
                             <div className="team">{getTeamName(match.team2_id)}</div>
