@@ -454,11 +454,11 @@ function App() {
   return (
     <div className="app-container">
       <div className="banner-triptych" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '2rem', marginBottom: '2.5rem', width: '100%' }}>
-        <div className="banner-item glass-panel" style={{ width: '25%', overflow: 'hidden', border: '1px solid rgba(0, 242, 254, 0.3)', boxShadow: '0 10px 40px rgba(0, 0, 0, 0.6)' }}>
+        <div className="banner-item float-anim" style={{ width: '25%', display: 'flex', justifyContent: 'center', alignItems: 'center', animationDelay: '0s' }}>
           <img 
             src={trophyImg} 
             alt="Copa del Mundo" 
-            style={{ width: '100%', height: 'auto', display: 'block', opacity: '0.9' }}
+            style={{ width: '100%', height: 'auto', display: 'block', opacity: '0.95' }}
           />
         </div>
         <div className="banner-item glass-panel" style={{ width: '25%', overflow: 'hidden', border: '1px solid rgba(0, 242, 254, 0.3)', boxShadow: '0 10px 40px rgba(0, 0, 0, 0.6)' }}>
@@ -468,11 +468,11 @@ function App() {
             style={{ width: '100%', height: 'auto', display: 'block', opacity: '0.9' }}
           />
         </div>
-        <div className="banner-item glass-panel" style={{ width: '25%', overflow: 'hidden', border: '1px solid rgba(0, 242, 254, 0.3)', boxShadow: '0 10px 40px rgba(0, 0, 0, 0.6)' }}>
+        <div className="banner-item float-anim" style={{ width: '25%', display: 'flex', justifyContent: 'center', alignItems: 'center', animationDelay: '1s' }}>
           <img 
             src={mascotImg} 
             alt="Mascotas Mundial 2026" 
-            style={{ width: '100%', height: 'auto', display: 'block', opacity: '0.9' }}
+            style={{ width: '100%', height: 'auto', display: 'block', opacity: '0.95' }}
           />
         </div>
       </div>
@@ -810,7 +810,7 @@ function App() {
             <h2>Ranking de Quinielas</h2>
           </div>
 
-          <div className="stats-dashboard glass-panel" style={{marginBottom: '2rem', padding: '1.5rem', display: 'flex', justifyContent: 'space-around', flexWrap: 'wrap', gap: '1rem'}}>
+          <div className="stats-dashboard glass-panel-heavy" style={{marginBottom: '2rem', padding: '1.5rem', display: 'flex', justifyContent: 'space-around', flexWrap: 'wrap', gap: '1rem'}}>
             <div className="stat-item" style={{textAlign: 'center'}}>
               <div style={{fontSize: '0.9rem', color: 'var(--text-muted)'}}>Encuentros Disputados</div>
               <div style={{fontSize: '2rem', color: 'var(--primary-color)', fontWeight: 800}}>{rankingInfo.playedMatches} / {rankingInfo.totalGroupMatches}</div>
