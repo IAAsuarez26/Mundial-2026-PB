@@ -507,7 +507,8 @@ function App() {
               <input 
                 type="text" 
                 className="user-name-input glass-panel" 
-                placeholder="Cédula"
+                placeholder="Cédula / DNI / Pasaporte"
+                title="Documento de Identidad"
                 value={userCedula}
                 onChange={(e) => setUserCedula(e.target.value)}
               />
@@ -920,7 +921,7 @@ function App() {
             <div className="rules-section">
               <h3>📋 Condiciones Generales</h3>
               <ul>
-                <li>Se permite un máximo de <strong>3 quinielas</strong> por participante (usando la misma cédula pero distinto apodo).</li>
+                <li>Se permite un máximo de <strong>3 quinielas</strong> por participante (usando el mismo documento de identidad pero distinto apodo).</li>
                 <li>Los pronósticos se pueden modificar hasta el inicio de cada partido.</li>
                 <li>En caso de empate en puntos en el ranking, la posición se definirá por mayor número de marcadores exactos.</li>
                 <li>La transparencia es total: todos pueden ver los pronósticos de los demás en la pestaña de Ranking.</li>
@@ -943,7 +944,7 @@ function App() {
               <div className="manual-step">
                 <div className="step-num">1</div>
                 <div className="step-text">
-                  <strong>Identificación:</strong> Ingresa tu Cédula, Nombre (o apodo) y Correo Electrónico. Recuerda que el correo es vital para recibir tu comprobante.
+                  <strong>Identificación:</strong> Ingresa tu Documento de Identidad (Cédula, DNI o Pasaporte), Nombre (o apodo) y Correo Electrónico. Recuerda que el correo es vital para recibir tu comprobante.
                 </div>
               </div>
               <div className="manual-step">
