@@ -317,7 +317,17 @@ function App() {
     const standings = {}
     Object.keys(groups).forEach(groupName => {
       standings[groupName] = groups[groupName].map(team => ({
-        ...team, points: 0, goalsFor: 0, goalsAgainst: 0, goalDiff: 0, played: 0, won: 0, drawn: 0, lost: 0
+        id: team.id,
+        name: team.name,
+        group_letter: team.group_letter,
+        points: 0,
+        goalsFor: 0,
+        goalsAgainst: 0,
+        goalDiff: 0,
+        played: 0,
+        won: 0,
+        drawn: 0,
+        lost: 0
       }))
     })
 
@@ -330,9 +340,9 @@ function App() {
         let t1Index = -1
         let t2Index = -1
 
-        for (const [groupName, teams] of Object.entries(standings)) {
-          const i1 = teams.findIndex(t => t.id === match.team1_id)
-          const i2 = teams.findIndex(t => t.id === match.team2_id)
+        for (const [groupName, groupTeams] of Object.entries(standings)) {
+          const i1 = groupTeams.findIndex(t => t.id === match.team1_id)
+          const i2 = groupTeams.findIndex(t => t.id === match.team2_id)
           if (i1 !== -1 && i2 !== -1) {
             matchGroup = groupName
             t1Index = i1
@@ -345,29 +355,32 @@ function App() {
           const s1 = pred.team1
           const s2 = pred.team2
           
-          standings[matchGroup][t1Index].goalsFor += s1
-          standings[matchGroup][t1Index].goalsAgainst += s2
-          standings[matchGroup][t1Index].goalDiff += (s1 - s2)
-          standings[matchGroup][t1Index].played += 1
+          const team1 = standings[matchGroup][t1Index]
+          const team2 = standings[matchGroup][t2Index]
+
+          team1.goalsFor += s1
+          team1.goalsAgainst += s2
+          team1.goalDiff += (s1 - s2)
+          team1.played += 1
           
-          standings[matchGroup][t2Index].goalsFor += s2
-          standings[matchGroup][t2Index].goalsAgainst += s1
-          standings[matchGroup][t2Index].goalDiff += (s2 - s1)
-          standings[matchGroup][t2Index].played += 1
+          team2.goalsFor += s2
+          team2.goalsAgainst += s1
+          team2.goalDiff += (s2 - s1)
+          team2.played += 1
 
           if (s1 > s2) {
-            standings[matchGroup][t1Index].points += 3
-            standings[matchGroup][t1Index].won += 1
-            standings[matchGroup][t2Index].lost += 1
+            team1.points += 3
+            team1.won += 1
+            team2.lost += 1
           } else if (s1 < s2) {
-            standings[matchGroup][t2Index].points += 3
-            standings[matchGroup][t2Index].won += 1
-            standings[matchGroup][t1Index].lost += 1
+            team2.points += 3
+            team2.won += 1
+            team1.lost += 1
           } else {
-            standings[matchGroup][t1Index].points += 1
-            standings[matchGroup][t2Index].points += 1
-            standings[matchGroup][t1Index].drawn += 1
-            standings[matchGroup][t2Index].drawn += 1
+            team1.points += 1
+            team2.points += 1
+            team1.drawn += 1
+            team2.drawn += 1
           }
         }
       }
