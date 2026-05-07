@@ -495,8 +495,8 @@ function App() {
             <button className={`tab-btn ${currentView === 'ranking' ? 'active' : ''}`} onClick={() => setCurrentView('ranking')}>Ranking</button>
             <button className={`tab-btn ${currentView === 'admin' ? 'active' : ''}`} onClick={() => setCurrentView('admin')}>Administrador</button>
             <button className="tab-btn manual-btn" onClick={() => setShowManualModal(true)}>📖 Manual</button>
+            <button className="tab-btn rules-btn" onClick={() => setShowRulesModal(true)}>📜 Reglamento</button>
           </div>
-          <button className="tab-btn rules-btn" onClick={() => setShowRulesModal(true)}>📜 Reglamento</button>
         </div>
       </header>
 

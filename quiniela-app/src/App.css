@@ -517,8 +517,6 @@
 }
 
 .rules-btn {
-  position: absolute;
-  right: 0;
   background: rgba(255, 255, 255, 0.1) !important;
   color: #fff !important;
 }
@@ -676,12 +674,7 @@
     margin-bottom: 0.5rem;
   }
 
-  .rules-btn {
-    position: static !important;
-    width: 100% !important;
-    margin-top: 0.5rem !important;
-    right: auto !important;
-  }
+
 
   .user-input-section {
     flex-direction: column;
