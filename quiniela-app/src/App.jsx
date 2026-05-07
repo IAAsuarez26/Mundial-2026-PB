@@ -863,6 +863,20 @@ function App() {
                   </tr>
                 </thead>
                 <tbody>
+                  {/* Real Results Row */}
+                  <tr style={{ background: 'rgba(0, 242, 254, 0.1)', fontWeight: 'bold' }}>
+                    <td className="sticky-col first-col" style={{ background: 'rgba(0, 150, 160, 0.95)' }}>-</td>
+                    <td className="sticky-col second-col" style={{ background: 'rgba(0, 150, 160, 0.95)', color: 'var(--primary-color)' }}>RESULTADO REAL</td>
+                    <td colSpan="3" style={{ textAlign: 'center', fontSize: '0.75rem', color: 'var(--text-muted)' }}>Score Oficial</td>
+                    {rankingInfo.groupMatches.map(m => {
+                      const isFinished = m.score_team1 !== null && m.score_team2 !== null;
+                      return (
+                        <td key={m.id} style={{ color: isFinished ? 'var(--primary-color)' : '#888' }}>
+                          {isFinished ? `${m.score_team1}-${m.score_team2}` : 'NP'}
+                        </td>
+                      );
+                    })}
+                  </tr>
                   {rankingInfo.scores.map((user, idx) => {
                     const distinctPoints = [...new Set(rankingInfo.scores.map(s => s.points))]
                     const place = distinctPoints.indexOf(user.points) + 1
