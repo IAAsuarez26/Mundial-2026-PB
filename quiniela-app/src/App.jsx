@@ -187,14 +187,14 @@ function App() {
     }
 
     const groupMatches = matches.filter(m => m.id <= 72)
-    const missingMatch = groupMatches.find(match => {
+    const missingMatches = groupMatches.filter(match => {
       if (isMatchStarted(match.date)) return false
       const pred = predictions[match.id]
-      return !pred || pred.team1 === undefined || pred.team1 === null || pred.team2 === undefined || pred.team2 === null
+      return !pred || pred.team1 === null || pred.team1 === undefined || pred.team2 === null || pred.team2 === undefined
     })
 
-    if (missingMatch) {
-      alert(`Falta el Partido ${missingMatch.id}.`)
+    if (missingMatches.length > 0) {
+      alert(`Debes completar los 72 pronósticos de la Fase de Grupos para poder guardar. Te faltan ${missingMatches.length} partidos por llenar.`)
       return
     }
 
