@@ -369,11 +369,16 @@ function App() {
       return Promise.resolve()
     }
 
+    const htmlLength = templateParams.message.length
+    console.log(`[Email] Sending to: ${templateParams.to_email}`)
+    console.log(`[Email] HTML size: ${htmlLength} chars`)
+    console.log(`[Email] SERVICE_ID: ${SERVICE_ID} | TEMPLATE_ID: ${TEMPLATE_ID}`)
+
     return emailjs.send(SERVICE_ID, TEMPLATE_ID, templateParams, PUBLIC_KEY)
       .then((response) => {
-         console.log('SUCCESS!', response.status, response.text);
+         console.log('[Email] SUCCESS!', response.status, response.text);
       }, (err) => {
-         console.log('FAILED...', err);
+         console.error('[Email] FAILED:', err);
          throw err
       });
   }
