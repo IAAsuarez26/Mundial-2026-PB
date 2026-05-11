@@ -34,6 +34,7 @@ function App() {
   const [isSaving, setIsSaving] = useState(false)
   const [showRulesModal, setShowRulesModal] = useState(false)
   const [showManualModal, setShowManualModal] = useState(false)
+  const [showSuccessModal, setShowSuccessModal] = useState(false)
 
   const toggleJornada = (jornadaName) => {
     setExpandedJornadas(prev => ({ ...prev, [jornadaName]: !prev[jornadaName] }))
@@ -244,14 +245,15 @@ function App() {
 
       try {
         await sendEmail()
-        alert(`¡Quiniela de "${userName.trim()}" guardada y correo enviado exitosamente!`)
+        setShowSuccessModal(true)
       } catch (emailErr) {
         console.error("Email failed:", emailErr)
-        alert(`¡Quiniela de "${userName.trim()}" guardada! (Pero hubo un problema enviando el correo)`)
+        // Even if email fails, it was saved in DB
+        setShowSuccessModal(true) 
       }
       
-      resetForm()
-      window.location.reload() 
+      // resetForm() // We might want to keep the data visible for a moment
+      // window.location.reload() 
     } catch (err) {
 
       console.error(err)
@@ -721,6 +723,30 @@ function App() {
               {isSaving ? 'Guardando...' : '¡Guardar mi Quiniela!'}
             </button>
           </div>
+
+          {showSuccessModal && (
+            <div className="modal-overlay">
+              <div className="modal-content glass-panel" style={{textAlign: 'center', maxWidth: '450px'}}>
+                <div style={{marginBottom: '1rem'}}>
+                  <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#2ecc71" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                  </svg>
+                </div>
+                <h2 className="text-gradient" style={{margin: '0 0 1rem'}}>¡Quiniela Guardada!</h2>
+                <p style={{fontSize: '1.05rem', color: 'var(--text-muted)', lineHeight: '1.7', marginBottom: '0.5rem'}}>
+                  Tus pronósticos han sido guardados <strong style={{color: '#2ecc71'}}>exitosamente</strong>.
+                </p>
+                <p style={{fontSize: '1.05rem', color: 'var(--text-muted)', lineHeight: '1.7', marginBottom: '2rem'}}>
+                  Se ha enviado un reporte detallado a:<br/>
+                  <strong style={{color: 'white'}}>{userEmail}</strong>
+                </p>
+                <button className="save-btn" onClick={() => window.location.reload()} style={{width: '100%', fontSize: '1.1rem'}}>
+                  ¡Entendido!
+                </button>
+              </div>
+            </div>
+          )}
         </>
       )}
 
