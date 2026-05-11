@@ -1,4 +1,4 @@
-// Quiniela Mundial 2026 - v1.0.1 - Despliegue con Autor Corregido
+// Quiniela Mundial 2026 - v1.0.1 - Sync: 2026-05-10 20:51
 import { useState, useEffect, useMemo } from 'react'
 import emailjs from '@emailjs/browser'
 import { supabase } from './supabaseClient'
