@@ -1,4 +1,4 @@
-// Quiniela Mundial 2026 - v1.0.1 - Sync: 2026-05-10 20:51
+// Quiniela Mundial 2026 - v1.0.2 - Authorized Sync: 2026-05-10 21:23
 import { useState, useEffect, useMemo } from 'react'
 import emailjs from '@emailjs/browser'
 import { supabase } from './supabaseClient'
