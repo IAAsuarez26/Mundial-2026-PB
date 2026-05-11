@@ -672,7 +672,7 @@ function App() {
               onClick={() => setShowGroups(prev => !prev)}
               style={{cursor: 'pointer', padding: '1rem', marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}
             >
-              <h3 className="text-gradient" style={{margin: 0, fontSize: '1.5rem'}}>Posiciones por Grupos</h3>
+              <h3 className="text-gradient" style={{margin: 0, fontSize: '1.5rem'}}>Posiciones por grupo</h3>
               <span style={{fontSize: '1.5rem'}}>{showGroups ? '▲' : '▼'}</span>
             </div>
             {showGroups && (
