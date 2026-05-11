@@ -320,9 +320,7 @@ function App() {
         <h2 style="color: #003366; border-bottom: 2px solid #eee; padding-bottom: 10px; font-size: 18px; margin-top: 30px;">Tus Pronósticos</h2>
         ${matchesHTML}
 
-        <p style="text-align: center; margin-top: 30px;">
-          <a href="#" style="background-color: #003366; color: #ffffff; padding: 12px 20px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 14px;">Descargar Reporte Completo</a>
-        </p>
+
       </td>
     </tr>
   </table>
