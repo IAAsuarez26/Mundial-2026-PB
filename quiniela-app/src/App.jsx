@@ -262,28 +262,86 @@ function App() {
   }
 
   const sendEmail = () => {
-    let message = `Hola ${userName},\n\nAquí tienes un resumen de tus predicciones para la Quiniela Mundial 2026:\n\n`
+    // 1. Generate Group Standings HTML
+    let standingsHTML = ''
+    Object.entries(groupStandings).forEach(([groupName, teams]) => {
+      standingsHTML += `
+        <table width="100%" style="border-collapse: collapse; margin-bottom: 20px;">
+          <thead>
+            <tr style="background-color: #f8f9fa;">
+              <th style="padding: 10px; text-align: left; border: 1px solid #dee2e6; font-size: 13px;">GRUPO ${groupName}</th>
+              <th style="padding: 10px; text-align: center; border: 1px solid #dee2e6; font-size: 13px;">PTS</th>
+              <th style="padding: 10px; text-align: center; border: 1px solid #dee2e6; font-size: 13px;">DG</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${teams.map((team, index) => `
+              <tr>
+                <td style="padding: 8px; border: 1px solid #dee2e6; font-size: 13px;">${index + 1}. ${team.name}</td>
+                <td style="padding: 8px; border: 1px solid #dee2e6; text-align: center; font-weight: bold; font-size: 13px;">${team.points}</td>
+                <td style="padding: 8px; border: 1px solid #dee2e6; text-align: center; color: ${team.goalDiff >= 0 ? 'green' : 'red'}; font-size: 13px;">${team.goalDiff > 0 ? '+' : ''}${team.goalDiff}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `
+    })
+
+    // 2. Generate Match History HTML
     const groupMatches = matches.filter(m => m.id <= 72)
+    let matchesHTML = '<div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; border: 1px solid #eee;">'
+    matchesHTML += '<p style="font-size: 12px; line-height: 1.5; color: #666; margin: 0;">'
     groupMatches.forEach(match => {
       const pred = predictions[match.id]
       if (pred) {
-        message += `Partido ${match.id}: ${getTeamName(match.team1_id)} ${pred.team1} - ${pred.team2} ${getTeamName(match.team2_id)}\n`
+        matchesHTML += `<strong>Partido ${match.id}:</strong> ${getTeamName(match.team1_id)} ${pred.team1} - ${pred.team2} ${getTeamName(match.team2_id)}<br>`
       }
     })
+    matchesHTML += '</p></div>'
 
-    message += `\nPOSICIONES PROYECTADAS POR GRUPO:\n`
-    message += `--------------------------------\n`
-    Object.entries(groupStandings).forEach(([groupName, teams]) => {
-      message += `\nGRUPO ${groupName}:\n`
-      teams.forEach((team, index) => {
-        message += `${index + 1}. ${team.name} - ${team.points} pts (DG: ${team.goalDiff > 0 ? '+' : ''}${team.goalDiff})\n`
-      })
-    })
+    // 3. Final HTML Document (using user template)
+    const emailHTML = `
+<div style="background-color: #f4f7f6; padding: 20px; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+  <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px; background-color: #003366; border-radius: 10px 10px 0 0;">
+    <tr>
+      <td style="padding: 20px; text-align: center;">
+        <h1 style="color: #ffffff; margin: 0; font-size: 22px;">Posiciones según tus Pronósticos</h1>
+      </td>
+    </tr>
+  </table>
+
+  <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px; background-color: #ffffff; border-radius: 0 0 10px 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+    <tr>
+      <td style="padding: 20px;">
+        <h2 style="color: #003366; border-bottom: 2px solid #eee; padding-bottom: 10px; font-size: 18px;">Posiciones Proyectadas</h2>
+        
+        ${standingsHTML}
+
+        <h2 style="color: #003366; border-bottom: 2px solid #eee; padding-bottom: 10px; font-size: 18px; margin-top: 30px;">Tus Pronósticos</h2>
+        ${matchesHTML}
+
+        <p style="text-align: center; margin-top: 30px;">
+          <a href="#" style="background-color: #003366; color: #ffffff; padding: 12px 20px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 14px;">Descargar Reporte Completo</a>
+        </p>
+      </td>
+    </tr>
+  </table>
+
+  <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px; margin-top: 20px;">
+    <tr>
+      <td style="text-align: center; font-size: 11px; color: #999;">
+        Este correo fue enviado automáticamente por el sistema de gestión deportiva.<br>
+        © 2026 Simulador de Resultados.
+      </td>
+    </tr>
+  </table>
+</div>
+`
 
     const templateParams = {
       to_name: userName,
       to_email: userEmail.trim(),
-      message: message
+      message: emailHTML.trim().replace(/>\s+</g, '><') // Remove whitespace between tags for robustness
     }
 
     const SERVICE_ID = import.meta.env.VITE_EMAILJS_SERVICE_ID
