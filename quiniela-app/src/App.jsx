@@ -596,9 +596,6 @@ function App() {
                 onChange={(e) => setUserEmail(e.target.value)}
               />
             </div>
-            <button className="save-btn" style={{marginTop: '1rem'}} onClick={savePredictions} disabled={isSaving}>
-              {isSaving ? 'Guardando...' : 'Guardar mi Quiniela'}
-            </button>
           </div>
 
 
@@ -665,11 +662,7 @@ function App() {
             })}
           </section>
 
-          <div style={{display: 'flex', justifyContent: 'center', marginTop: '2rem'}}>
-            <button className="save-btn" onClick={savePredictions} disabled={isSaving}>
-              {isSaving ? 'Guardando...' : 'Guardar mi Quiniela'}
-            </button>
-          </div>
+
 
           <section className="groups-section" style={{marginTop: '3rem'}}>
             <div 
@@ -722,6 +715,12 @@ function App() {
             </div>
             )}
           </section>
+
+          <div style={{display: 'flex', justifyContent: 'center', marginTop: '3rem', marginBottom: '3rem'}}>
+            <button className="save-btn" onClick={savePredictions} disabled={isSaving} style={{padding: '1.2rem 3rem', fontSize: '1.2rem'}}>
+              {isSaving ? 'Guardando...' : '¡Guardar mi Quiniela!'}
+            </button>
+          </div>
         </>
       )}
 
