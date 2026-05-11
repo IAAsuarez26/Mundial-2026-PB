@@ -268,22 +268,39 @@ function App() {
     let standingsHTML = ''
     Object.entries(groupStandings).forEach(([groupName, teams]) => {
       standingsHTML += `
-        <table width="100%" style="border-collapse: collapse; margin-bottom: 20px;">
+        <table width="100%" style="border-collapse: collapse; margin-bottom: 24px; font-family: Arial, sans-serif; font-size: 12px;">
           <thead>
-            <tr style="background-color: #f8f9fa;">
-              <th style="padding: 10px; text-align: left; border: 1px solid #dee2e6; font-size: 13px;">GRUPO ${groupName}</th>
-              <th style="padding: 10px; text-align: center; border: 1px solid #dee2e6; font-size: 13px;">PTS</th>
-              <th style="padding: 10px; text-align: center; border: 1px solid #dee2e6; font-size: 13px;">DG</th>
+            <tr style="background-color: #003366; color: #ffffff;">
+              <th style="padding: 8px 10px; text-align: left; border: 1px solid #dee2e6;" colspan="2">GRUPO ${groupName}</th>
+              <th style="padding: 8px 4px; text-align: center; border: 1px solid #dee2e6; width: 28px;" title="Partidos Jugados">PJ</th>
+              <th style="padding: 8px 4px; text-align: center; border: 1px solid #dee2e6; width: 28px;" title="Partidos Ganados">PG</th>
+              <th style="padding: 8px 4px; text-align: center; border: 1px solid #dee2e6; width: 28px;" title="Partidos Empatados">PE</th>
+              <th style="padding: 8px 4px; text-align: center; border: 1px solid #dee2e6; width: 28px;" title="Partidos Perdidos">PP</th>
+              <th style="padding: 8px 4px; text-align: center; border: 1px solid #dee2e6; width: 28px;" title="Goles a Favor">GF</th>
+              <th style="padding: 8px 4px; text-align: center; border: 1px solid #dee2e6; width: 28px;" title="Goles en Contra">GC</th>
+              <th style="padding: 8px 4px; text-align: center; border: 1px solid #dee2e6; width: 36px;" title="Diferencia de Goles">DG</th>
+              <th style="padding: 8px 6px; text-align: center; border: 1px solid #dee2e6; width: 36px; color: #00f2fe;" title="Puntos">PTS</th>
             </tr>
           </thead>
           <tbody>
-            ${teams.map((team, index) => `
-              <tr>
-                <td style="padding: 8px; border: 1px solid #dee2e6; font-size: 13px;">${index + 1}. ${team.name}</td>
-                <td style="padding: 8px; border: 1px solid #dee2e6; text-align: center; font-weight: bold; font-size: 13px;">${team.points}</td>
-                <td style="padding: 8px; border: 1px solid #dee2e6; text-align: center; color: ${team.goalDiff >= 0 ? 'green' : 'red'}; font-size: 13px;">${team.goalDiff > 0 ? '+' : ''}${team.goalDiff}</td>
-              </tr>
-            `).join('')}
+            ${teams.map((team, index) => {
+              const rowBg = index % 2 === 0 ? '#ffffff' : '#f8f9fa'
+              const dgColor = team.goalDiff > 0 ? '#27ae60' : team.goalDiff < 0 ? '#e74c3c' : '#555'
+              const dgText = team.goalDiff > 0 ? `+${team.goalDiff}` : `${team.goalDiff}`
+              return `
+              <tr style="background-color: ${rowBg};">
+                <td style="padding: 7px 6px; border: 1px solid #dee2e6; width: 20px; color: #888; font-weight: bold;">${index + 1}.</td>
+                <td style="padding: 7px 8px; border: 1px solid #dee2e6; font-weight: 600; color: #222;">${team.name}</td>
+                <td style="padding: 7px 4px; border: 1px solid #dee2e6; text-align: center; color: #555;">${team.played}</td>
+                <td style="padding: 7px 4px; border: 1px solid #dee2e6; text-align: center; color: #555;">${team.won}</td>
+                <td style="padding: 7px 4px; border: 1px solid #dee2e6; text-align: center; color: #555;">${team.drawn}</td>
+                <td style="padding: 7px 4px; border: 1px solid #dee2e6; text-align: center; color: #555;">${team.lost}</td>
+                <td style="padding: 7px 4px; border: 1px solid #dee2e6; text-align: center; color: #555;">${team.goalsFor}</td>
+                <td style="padding: 7px 4px; border: 1px solid #dee2e6; text-align: center; color: #555;">${team.goalsAgainst}</td>
+                <td style="padding: 7px 4px; border: 1px solid #dee2e6; text-align: center; color: ${dgColor}; font-weight: bold;">${dgText}</td>
+                <td style="padding: 7px 6px; border: 1px solid #dee2e6; text-align: center; font-weight: 900; color: #003366; font-size: 13px;">${team.points}</td>
+              </tr>`
+            }).join('')}
           </tbody>
         </table>
       `
