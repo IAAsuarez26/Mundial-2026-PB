@@ -603,57 +603,7 @@ function App() {
             </button>
           </div>
 
-          <section className="groups-section">
-            <div 
-              className="jornada-header-toggle glass-panel" 
-              onClick={() => setShowGroups(prev => !prev)}
-              style={{cursor: 'pointer', padding: '1rem', marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}
-            >
-              <h3 className="text-gradient" style={{margin: 0, fontSize: '1.5rem'}}>Posiciones de Grupos</h3>
-              <span style={{fontSize: '1.5rem'}}>{showGroups ? '▲' : '▼'}</span>
-            </div>
-            {showGroups && (
-            <div className="groups-grid">
-              {Object.entries(groupStandings).map(([groupName, teams], idx) => (
-                <div key={groupName} className="glass-panel group-card" style={{ animationDelay: `${idx * 0.05}s` }}>
-                  <div className="group-header">
-                    <h2 className="group-title">Grupo {groupName}</h2>
-                  </div>
-                  <ul className="team-list">
-                    <li className="team-item team-header">
-                      <span className="team-name" style={{fontSize: '0.8rem'}}>Equipo</span>
-                      <div className="team-stats">
-                        <span className="stat-label" title="Partidos Jugados">PJ</span>
-                        <span className="stat-label" title="Partidos Ganados">PG</span>
-                        <span className="stat-label" title="Partidos Empatados">PE</span>
-                        <span className="stat-label" title="Partidos Perdidos">PP</span>
-                        <span className="stat-label" title="Goles a Favor">GF</span>
-                        <span className="stat-label" title="Goles en Contra">GC</span>
-                        <span className="stat-label" title="Diferencia de Goles">DG</span>
-                        <span className="stat-label" title="Puntos" style={{color: 'var(--primary-color)'}}>PTS</span>
-                      </div>
-                    </li>
-                    {teams.map((team, index) => (
-                      <li key={team.id} className="team-item">
-                        <span className="team-name">{index + 1}. {team.name}</span>
-                        <div className="team-stats">
-                          <span className="stat-val">{team.played}</span>
-                          <span className="stat-val">{team.won}</span>
-                          <span className="stat-val">{team.drawn}</span>
-                          <span className="stat-val">{team.lost}</span>
-                          <span className="stat-val">{team.goalsFor}</span>
-                          <span className="stat-val">{team.goalsAgainst}</span>
-                          <span className="stat-val">{team.goalDiff > 0 ? `+${team.goalDiff}` : team.goalDiff}</span>
-                          <span className="team-points">{team.points}</span>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
-            </div>
-            )}
-          </section>
+
 
           <section className="matches-section">
             <h2 className="matches-header text-gradient" style={{marginBottom: '2rem'}}>Fase de Grupos</h2>
@@ -722,6 +672,58 @@ function App() {
               {isSaving ? 'Guardando...' : 'Guardar mi Quiniela'}
             </button>
           </div>
+
+          <section className="groups-section" style={{marginTop: '3rem'}}>
+            <div 
+              className="jornada-header-toggle glass-panel" 
+              onClick={() => setShowGroups(prev => !prev)}
+              style={{cursor: 'pointer', padding: '1rem', marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}
+            >
+              <h3 className="text-gradient" style={{margin: 0, fontSize: '1.5rem'}}>Posiciones de Grupos</h3>
+              <span style={{fontSize: '1.5rem'}}>{showGroups ? '▲' : '▼'}</span>
+            </div>
+            {showGroups && (
+            <div className="groups-grid">
+              {Object.entries(groupStandings).map(([groupName, teams], idx) => (
+                <div key={groupName} className="glass-panel group-card" style={{ animationDelay: `${idx * 0.05}s` }}>
+                  <div className="group-header">
+                    <h2 className="group-title">Grupo {groupName}</h2>
+                  </div>
+                  <ul className="team-list">
+                    <li className="team-item team-header">
+                      <span className="team-name" style={{fontSize: '0.8rem'}}>Equipo</span>
+                      <div className="team-stats">
+                        <span className="stat-label" title="Partidos Jugados">PJ</span>
+                        <span className="stat-label" title="Partidos Ganados">PG</span>
+                        <span className="stat-label" title="Partidos Empatados">PE</span>
+                        <span className="stat-label" title="Partidos Perdidos">PP</span>
+                        <span className="stat-label" title="Goles a Favor">GF</span>
+                        <span className="stat-label" title="Goles en Contra">GC</span>
+                        <span className="stat-label" title="Diferencia de Goles">DG</span>
+                        <span className="stat-label" title="Puntos" style={{color: 'var(--primary-color)'}}>PTS</span>
+                      </div>
+                    </li>
+                    {teams.map((team, index) => (
+                      <li key={team.id} className="team-item">
+                        <span className="team-name">{index + 1}. {team.name}</span>
+                        <div className="team-stats">
+                          <span className="stat-val">{team.played}</span>
+                          <span className="stat-val">{team.won}</span>
+                          <span className="stat-val">{team.drawn}</span>
+                          <span className="stat-val">{team.lost}</span>
+                          <span className="stat-val">{team.goalsFor}</span>
+                          <span className="stat-val">{team.goalsAgainst}</span>
+                          <span className="stat-val">{team.goalDiff > 0 ? `+${team.goalDiff}` : team.goalDiff}</span>
+                          <span className="team-points">{team.points}</span>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+            )}
+          </section>
         </>
       )}
 
