@@ -20,7 +20,7 @@ function App() {
   const [userCedula, setUserCedula] = useState('')
   const [userEmail, setUserEmail] = useState('')
   const [predictions, setPredictions] = useState({})
-  const [expandedJornadas, setExpandedJornadas] = useState({ 'Jornada 1': true })
+  const [expandedJornadas, setExpandedJornadas] = useState({})
   const [showGroups, setShowGroups] = useState(true)
 
   // Dynamic Data State
