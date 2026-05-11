@@ -264,101 +264,45 @@ function App() {
   }
 
   const sendEmail = () => {
-    // 1. Generate Group Standings HTML
+    // 1. Generate compact standings HTML using CSS classes
     let standingsHTML = ''
     Object.entries(groupStandings).forEach(([groupName, teams]) => {
-      standingsHTML += `
-        <table width="100%" style="border-collapse: collapse; margin-bottom: 24px; font-family: Arial, sans-serif; font-size: 12px;">
-          <thead>
-            <tr style="background-color: #003366; color: #ffffff;">
-              <th style="padding: 8px 10px; text-align: left; border: 1px solid #dee2e6;" colspan="2">GRUPO ${groupName}</th>
-              <th style="padding: 8px 4px; text-align: center; border: 1px solid #dee2e6; width: 28px;" title="Partidos Jugados">PJ</th>
-              <th style="padding: 8px 4px; text-align: center; border: 1px solid #dee2e6; width: 28px;" title="Partidos Ganados">PG</th>
-              <th style="padding: 8px 4px; text-align: center; border: 1px solid #dee2e6; width: 28px;" title="Partidos Empatados">PE</th>
-              <th style="padding: 8px 4px; text-align: center; border: 1px solid #dee2e6; width: 28px;" title="Partidos Perdidos">PP</th>
-              <th style="padding: 8px 4px; text-align: center; border: 1px solid #dee2e6; width: 28px;" title="Goles a Favor">GF</th>
-              <th style="padding: 8px 4px; text-align: center; border: 1px solid #dee2e6; width: 28px;" title="Goles en Contra">GC</th>
-              <th style="padding: 8px 4px; text-align: center; border: 1px solid #dee2e6; width: 36px;" title="Diferencia de Goles">DG</th>
-              <th style="padding: 8px 6px; text-align: center; border: 1px solid #dee2e6; width: 36px; color: #00f2fe;" title="Puntos">PTS</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${teams.map((team, index) => {
-              const rowBg = index % 2 === 0 ? '#ffffff' : '#f8f9fa'
-              const dgColor = team.goalDiff > 0 ? '#27ae60' : team.goalDiff < 0 ? '#e74c3c' : '#555'
-              const dgText = team.goalDiff > 0 ? `+${team.goalDiff}` : `${team.goalDiff}`
-              return `
-              <tr style="background-color: ${rowBg};">
-                <td style="padding: 7px 6px; border: 1px solid #dee2e6; width: 20px; color: #888; font-weight: bold;">${index + 1}.</td>
-                <td style="padding: 7px 8px; border: 1px solid #dee2e6; font-weight: 600; color: #222;">${team.name}</td>
-                <td style="padding: 7px 4px; border: 1px solid #dee2e6; text-align: center; color: #555;">${team.played}</td>
-                <td style="padding: 7px 4px; border: 1px solid #dee2e6; text-align: center; color: #555;">${team.won}</td>
-                <td style="padding: 7px 4px; border: 1px solid #dee2e6; text-align: center; color: #555;">${team.drawn}</td>
-                <td style="padding: 7px 4px; border: 1px solid #dee2e6; text-align: center; color: #555;">${team.lost}</td>
-                <td style="padding: 7px 4px; border: 1px solid #dee2e6; text-align: center; color: #555;">${team.goalsFor}</td>
-                <td style="padding: 7px 4px; border: 1px solid #dee2e6; text-align: center; color: #555;">${team.goalsAgainst}</td>
-                <td style="padding: 7px 4px; border: 1px solid #dee2e6; text-align: center; color: ${dgColor}; font-weight: bold;">${dgText}</td>
-                <td style="padding: 7px 6px; border: 1px solid #dee2e6; text-align: center; font-weight: 900; color: #003366; font-size: 13px;">${team.points}</td>
-              </tr>`
-            }).join('')}
-          </tbody>
-        </table>
-      `
+      const rows = teams.map((team, i) => {
+        const dg = team.goalDiff > 0 ? `+${team.goalDiff}` : `${team.goalDiff}`
+        const dgStyle = team.goalDiff > 0 ? 'color:#27ae60' : team.goalDiff < 0 ? 'color:#e74c3c' : 'color:#555'
+        const bg = i % 2 === 0 ? '#fff' : '#f8f9fa'
+        return `<tr style="background:${bg}"><td class="n">${i+1}.</td><td class="nm">${team.name}</td><td class="s">${team.played}</td><td class="s">${team.won}</td><td class="s">${team.drawn}</td><td class="s">${team.lost}</td><td class="s">${team.goalsFor}</td><td class="s">${team.goalsAgainst}</td><td class="s" style="${dgStyle}">${dg}</td><td class="pts">${team.points}</td></tr>`
+      }).join('')
+      standingsHTML += `<p class="gh">GRUPO ${groupName}</p><table class="t"><tr class="th"><th class="nm2">Equipo</th><th class="s">PJ</th><th class="s">PG</th><th class="s">PE</th><th class="s">PP</th><th class="s">GF</th><th class="s">GC</th><th class="s">DG</th><th class="s">PTS</th></tr>${rows}</table>`
     })
 
-    // 2. Generate Match History HTML
+    // 2. Generate compact match predictions HTML (two columns)
     const groupMatches = matches.filter(m => m.id <= 72)
-    let matchesHTML = '<div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; border: 1px solid #eee;">'
-    matchesHTML += '<p style="font-size: 12px; line-height: 1.5; color: #666; margin: 0;">'
-    groupMatches.forEach(match => {
-      const pred = predictions[match.id]
-      if (pred) {
-        matchesHTML += `<strong>Partido ${match.id}:</strong> ${getTeamName(match.team1_id)} ${pred.team1} - ${pred.team2} ${getTeamName(match.team2_id)}<br>`
-      }
-    })
-    matchesHTML += '</p></div>'
+    const matchRows = groupMatches
+      .filter(m => predictions[m.id])
+      .map(m => {
+        const p = predictions[m.id]
+        return `<tr><td class="mc"><b>${m.id}.</b> ${getTeamName(m.team1_id)} <b>${p.team1}-${p.team2}</b> ${getTeamName(m.team2_id)}</td></tr>`
+      }).join('')
+    const matchesHTML = `<table class="t">${matchRows}</table>`
 
-    // 3. Final HTML Document (using user template)
-    const emailHTML = `
-<div style="background-color: #f4f7f6; padding: 20px; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
-  <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px; background-color: #003366; border-radius: 10px 10px 0 0;">
-    <tr>
-      <td style="padding: 20px; text-align: center;">
-        <h1 style="color: #ffffff; margin: 0; font-size: 22px;">Posiciones según tus Pronósticos</h1>
-      </td>
-    </tr>
-  </table>
-
-  <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px; background-color: #ffffff; border-radius: 0 0 10px 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-    <tr>
-      <td style="padding: 20px;">
-        <h2 style="color: #003366; border-bottom: 2px solid #eee; padding-bottom: 10px; font-size: 18px;">Posiciones Proyectadas</h2>
-        
-        ${standingsHTML}
-
-        <h2 style="color: #003366; border-bottom: 2px solid #eee; padding-bottom: 10px; font-size: 18px; margin-top: 30px;">Tus Pronósticos</h2>
-        ${matchesHTML}
-
-
-      </td>
-    </tr>
-  </table>
-
-  <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px; margin-top: 20px;">
-    <tr>
-      <td style="text-align: center; font-size: 11px; color: #999;">
-        Este correo fue enviado automáticamente por el sistema de gestión deportiva.<br>
-        © 2026 Simulador de Resultados.
-      </td>
-    </tr>
-  </table>
-</div>
-`
+    // 3. Final HTML with style block to avoid repeating inline styles
+    const emailHTML = `<div style="background:#f4f7f6;padding:15px;font-family:Arial,sans-serif">
+<style>.t{width:100%;border-collapse:collapse;margin-bottom:18px;font-size:12px}.th{background:#003366;color:#fff}.t th,.t td{padding:6px 4px;border:1px solid #dee2e6;text-align:center}.nm{text-align:left;font-weight:600;color:#222;padding:6px 8px;border:1px solid #dee2e6}.nm2{text-align:left;padding:6px 8px}.n{width:18px;color:#888;font-weight:700;border:1px solid #dee2e6;padding:6px 4px;text-align:center}.s{width:26px}.pts{font-weight:900;color:#003366;font-size:13px}.gh{font-weight:700;color:#003366;margin:16px 0 4px;font-size:13px}.mc{text-align:left;padding:5px 8px;border:1px solid #eee;font-size:12px}</style>
+<table width="100%" style="max-width:580px;margin:0 auto;background:#003366;border-radius:10px 10px 0 0"><tr><td style="padding:16px;text-align:center"><h1 style="color:#fff;margin:0;font-size:20px">Posiciones según tus Pronósticos</h1></td></tr></table>
+<table width="100%" style="max-width:580px;margin:0 auto;background:#fff;border-radius:0 0 10px 10px;padding:16px"><tr><td style="padding:16px">
+<h2 style="color:#003366;border-bottom:2px solid #eee;padding-bottom:8px;font-size:16px">Posiciones Proyectadas</h2>
+${standingsHTML}
+<h2 style="color:#003366;border-bottom:2px solid #eee;padding-bottom:8px;font-size:16px;margin-top:24px">Tus Pronósticos</h2>
+${matchesHTML}
+</td></tr></table>
+<p style="text-align:center;font-size:11px;color:#999;margin-top:12px">Enviado automáticamente · Quiniela Mundial 2026</p>
+</div>`
 
     const templateParams = {
       to_name: userName,
       to_email: userEmail.trim(),
-      message: emailHTML.trim().replace(/>\s+</g, '><') // Remove whitespace between tags for robustness
+      message: emailHTML
     }
 
     const SERVICE_ID = import.meta.env.VITE_EMAILJS_SERVICE_ID
@@ -369,10 +313,7 @@ function App() {
       return Promise.resolve()
     }
 
-    const htmlLength = templateParams.message.length
-    console.log(`[Email] Sending to: ${templateParams.to_email}`)
-    console.log(`[Email] HTML size: ${htmlLength} chars`)
-    console.log(`[Email] SERVICE_ID: ${SERVICE_ID} | TEMPLATE_ID: ${TEMPLATE_ID}`)
+    console.log(`[Email] HTML size: ${emailHTML.length} chars`)
 
     return emailjs.send(SERVICE_ID, TEMPLATE_ID, templateParams, PUBLIC_KEY)
       .then((response) => {
