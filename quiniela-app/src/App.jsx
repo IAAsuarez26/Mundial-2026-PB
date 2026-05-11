@@ -264,40 +264,80 @@ function App() {
   }
 
   const sendEmail = () => {
-    // 1. Generate compact standings HTML using CSS classes
+    // Reusable short style strings
+    const BD = 'border:1px solid #ddd'               // border
+    const CA = `${BD};text-align:center`              // center-aligned stat cell
+    const HDR = 'background:#003366;color:#fff'       // header row
+
+    // 1. Build standings tables using email-safe HTML attributes (no CSS classes)
     let standingsHTML = ''
     Object.entries(groupStandings).forEach(([groupName, teams]) => {
       const rows = teams.map((team, i) => {
         const dg = team.goalDiff > 0 ? `+${team.goalDiff}` : `${team.goalDiff}`
-        const dgStyle = team.goalDiff > 0 ? 'color:#27ae60' : team.goalDiff < 0 ? 'color:#e74c3c' : 'color:#555'
-        const bg = i % 2 === 0 ? '#fff' : '#f8f9fa'
-        return `<tr style="background:${bg}"><td class="n">${i+1}.</td><td class="nm">${team.name}</td><td class="s">${team.played}</td><td class="s">${team.won}</td><td class="s">${team.drawn}</td><td class="s">${team.lost}</td><td class="s">${team.goalsFor}</td><td class="s">${team.goalsAgainst}</td><td class="s" style="${dgStyle}">${dg}</td><td class="pts">${team.points}</td></tr>`
+        const dgColor = team.goalDiff > 0 ? '#27ae60' : team.goalDiff < 0 ? '#e74c3c' : '#444'
+        const bg = i % 2 === 0 ? '#fff' : '#f5f5f5'
+        return `<tr bgcolor="${bg}">` +
+          `<td width="18" style="${CA};color:#999">${i+1}.</td>` +
+          `<td style="${BD};font-weight:700;padding:5px 8px">${team.name}</td>` +
+          `<td width="26" style="${CA}">${team.played}</td>` +
+          `<td width="26" style="${CA}">${team.won}</td>` +
+          `<td width="26" style="${CA}">${team.drawn}</td>` +
+          `<td width="26" style="${CA}">${team.lost}</td>` +
+          `<td width="26" style="${CA}">${team.goalsFor}</td>` +
+          `<td width="26" style="${CA}">${team.goalsAgainst}</td>` +
+          `<td width="30" style="${CA};color:${dgColor};font-weight:700">${dg}</td>` +
+          `<td width="30" style="${CA};font-weight:900;color:#003366">${team.points}</td>` +
+        `</tr>`
       }).join('')
-      standingsHTML += `<p class="gh">GRUPO ${groupName}</p><table class="t"><tr class="th"><th class="nm2">Equipo</th><th class="s">PJ</th><th class="s">PG</th><th class="s">PE</th><th class="s">PP</th><th class="s">GF</th><th class="s">GC</th><th class="s">DG</th><th class="s">PTS</th></tr>${rows}</table>`
+
+      standingsHTML +=
+        `<p style="font-weight:700;color:#003366;font-size:13px;margin:14px 0 3px">GRUPO ${groupName}</p>` +
+        `<table width="100%" cellpadding="5" cellspacing="0" style="border-collapse:collapse;font-size:12px;margin-bottom:14px">` +
+          `<tr style="${HDR}">` +
+            `<th colspan="2" style="${BD};text-align:left;padding:5px 8px">Equipo</th>` +
+            `<th width="26" style="${BD}">PJ</th>` +
+            `<th width="26" style="${BD}">PG</th>` +
+            `<th width="26" style="${BD}">PE</th>` +
+            `<th width="26" style="${BD}">PP</th>` +
+            `<th width="26" style="${BD}">GF</th>` +
+            `<th width="26" style="${BD}">GC</th>` +
+            `<th width="30" style="${BD}">DG</th>` +
+            `<th width="30" style="${BD}">PTS</th>` +
+          `</tr>${rows}` +
+        `</table>`
     })
 
-    // 2. Generate compact match predictions HTML (two columns)
-    const groupMatches = matches.filter(m => m.id <= 72)
-    const matchRows = groupMatches
-      .filter(m => predictions[m.id])
+    // 2. Compact match predictions table (no long styles needed)
+    const matchRows = matches
+      .filter(m => m.id <= 72 && predictions[m.id])
       .map(m => {
         const p = predictions[m.id]
-        return `<tr><td class="mc"><b>${m.id}.</b> ${getTeamName(m.team1_id)} <b>${p.team1}-${p.team2}</b> ${getTeamName(m.team2_id)}</td></tr>`
+        return `<tr><td style="padding:4px 6px;border-bottom:1px solid #eee;font-size:11px">` +
+          `<b>${m.id}.</b> ${getTeamName(m.team1_id)} <b>${p.team1} – ${p.team2}</b> ${getTeamName(m.team2_id)}` +
+        `</td></tr>`
       }).join('')
-    const matchesHTML = `<table class="t">${matchRows}</table>`
 
-    // 3. Final HTML with style block to avoid repeating inline styles
-    const emailHTML = `<div style="background:#f4f7f6;padding:15px;font-family:Arial,sans-serif">
-<style>.t{width:100%;border-collapse:collapse;margin-bottom:18px;font-size:12px}.th{background:#003366;color:#fff}.t th,.t td{padding:6px 4px;border:1px solid #dee2e6;text-align:center}.nm{text-align:left;font-weight:600;color:#222;padding:6px 8px;border:1px solid #dee2e6}.nm2{text-align:left;padding:6px 8px}.n{width:18px;color:#888;font-weight:700;border:1px solid #dee2e6;padding:6px 4px;text-align:center}.s{width:26px}.pts{font-weight:900;color:#003366;font-size:13px}.gh{font-weight:700;color:#003366;margin:16px 0 4px;font-size:13px}.mc{text-align:left;padding:5px 8px;border:1px solid #eee;font-size:12px}</style>
-<table width="100%" style="max-width:580px;margin:0 auto;background:#003366;border-radius:10px 10px 0 0"><tr><td style="padding:16px;text-align:center"><h1 style="color:#fff;margin:0;font-size:20px">Posiciones según tus Pronósticos</h1></td></tr></table>
-<table width="100%" style="max-width:580px;margin:0 auto;background:#fff;border-radius:0 0 10px 10px;padding:16px"><tr><td style="padding:16px">
-<h2 style="color:#003366;border-bottom:2px solid #eee;padding-bottom:8px;font-size:16px">Posiciones Proyectadas</h2>
-${standingsHTML}
-<h2 style="color:#003366;border-bottom:2px solid #eee;padding-bottom:8px;font-size:16px;margin-top:24px">Tus Pronósticos</h2>
-${matchesHTML}
-</td></tr></table>
-<p style="text-align:center;font-size:11px;color:#999;margin-top:12px">Enviado automáticamente · Quiniela Mundial 2026</p>
-</div>`
+    const matchesHTML = `<table width="100%" cellspacing="0" style="border-collapse:collapse">${matchRows}</table>`
+
+    // 3. Final email wrapper
+    const emailHTML =
+      `<div style="background:#f0f2f5;padding:16px;font-family:Arial,sans-serif">` +
+      `<table width="100%" style="max-width:600px;margin:0 auto;background:#003366;border-radius:8px 8px 0 0">` +
+        `<tr><td style="padding:18px;text-align:center">` +
+          `<h1 style="color:#fff;margin:0;font-size:20px">Posiciones según tus Pronósticos</h1>` +
+          `<p style="color:#aad4f5;margin:6px 0 0;font-size:13px">Quiniela Mundial 2026 · ${userName}</p>` +
+        `</td></tr>` +
+      `</table>` +
+      `<table width="100%" style="max-width:600px;margin:0 auto;background:#fff;border-radius:0 0 8px 8px">` +
+        `<tr><td style="padding:20px">` +
+          `<h2 style="color:#003366;border-bottom:2px solid #eee;padding-bottom:8px;font-size:15px;margin-top:0">Posiciones Proyectadas</h2>` +
+          standingsHTML +
+          `<h2 style="color:#003366;border-bottom:2px solid #eee;padding-bottom:8px;font-size:15px;margin-top:20px">Tus Pronósticos</h2>` +
+          matchesHTML +
+        `</td></tr>` +
+      `</table>` +
+      `<p style="text-align:center;font-size:11px;color:#999;margin-top:10px">Enviado automáticamente · Quiniela Mundial 2026</p>` +
+      `</div>`
 
     const templateParams = {
       to_name: userName,
