@@ -347,6 +347,7 @@ function App() {
     }
 
     console.log(`[Email] HTML size: ${emailHTML.length} chars`)
+    console.log(`[Email] DEBUG ENV VARS -> Service: "${SERVICE_ID}", Template: "${TEMPLATE_ID}", PublicKey: "${PUBLIC_KEY ? PUBLIC_KEY.substring(0,4) + '...' : 'MISSING'}"`)
 
     return emailjs.send(SERVICE_ID, TEMPLATE_ID, templateParams, PUBLIC_KEY)
       .then((response) => {
