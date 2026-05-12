@@ -269,40 +269,33 @@ function App() {
     const CA = `${BD};text-align:center`              // center-aligned stat cell
     const HDR = 'background:#003366;color:#fff'       // header row
 
-    // 1. Build standings tables using email-safe HTML attributes (no CSS classes)
+    // 1. Build standings tables using email-safe HTML attributes (minimized size)
     let standingsHTML = ''
     Object.entries(groupStandings).forEach(([groupName, teams]) => {
       const rows = teams.map((team, i) => {
         const dg = team.goalDiff > 0 ? `+${team.goalDiff}` : `${team.goalDiff}`
         const dgColor = team.goalDiff > 0 ? '#27ae60' : team.goalDiff < 0 ? '#e74c3c' : '#444'
         const bg = i % 2 === 0 ? '#fff' : '#f5f5f5'
-        return `<tr bgcolor="${bg}">` +
-          `<td width="18" style="${CA};color:#999">${i+1}.</td>` +
-          `<td style="${BD};font-weight:700;padding:5px 8px">${team.name}</td>` +
-          `<td width="26" style="${CA}">${team.played}</td>` +
-          `<td width="26" style="${CA}">${team.won}</td>` +
-          `<td width="26" style="${CA}">${team.drawn}</td>` +
-          `<td width="26" style="${CA}">${team.lost}</td>` +
-          `<td width="26" style="${CA}">${team.goalsFor}</td>` +
-          `<td width="26" style="${CA}">${team.goalsAgainst}</td>` +
-          `<td width="30" style="${CA};color:${dgColor};font-weight:700">${dg}</td>` +
-          `<td width="30" style="${CA};font-weight:900;color:#003366">${team.points}</td>` +
+        return `<tr align="center" bgcolor="${bg}">` +
+          `<td style="color:#999">${i+1}.</td>` +
+          `<td align="left" style="font-weight:700">${team.name}</td>` +
+          `<td>${team.played}</td>` +
+          `<td>${team.won}</td>` +
+          `<td>${team.drawn}</td>` +
+          `<td>${team.lost}</td>` +
+          `<td>${team.goalsFor}</td>` +
+          `<td>${team.goalsAgainst}</td>` +
+          `<td style="color:${dgColor};font-weight:700">${dg}</td>` +
+          `<td style="font-weight:900;color:#003366">${team.points}</td>` +
         `</tr>`
       }).join('')
 
       standingsHTML +=
         `<p style="font-weight:700;color:#003366;font-size:13px;margin:14px 0 3px">GRUPO ${groupName}</p>` +
-        `<table width="100%" cellpadding="5" cellspacing="0" style="border-collapse:collapse;font-size:12px;margin-bottom:14px">` +
-          `<tr style="${HDR}">` +
-            `<th colspan="2" style="${BD};text-align:left;padding:5px 8px">Equipo</th>` +
-            `<th width="26" style="${BD}">PJ</th>` +
-            `<th width="26" style="${BD}">PG</th>` +
-            `<th width="26" style="${BD}">PE</th>` +
-            `<th width="26" style="${BD}">PP</th>` +
-            `<th width="26" style="${BD}">GF</th>` +
-            `<th width="26" style="${BD}">GC</th>` +
-            `<th width="30" style="${BD}">DG</th>` +
-            `<th width="30" style="${BD}">PTS</th>` +
+        `<table width="100%" cellpadding="4" cellspacing="0" border="1" bordercolor="#dddddd" style="border-collapse:collapse;font-size:11px;margin-bottom:14px">` +
+          `<tr align="center" bgcolor="#003366" style="color:#fff">` +
+            `<th colspan="2" align="left">Equipo</th>` +
+            `<th>PJ</th><th>PG</th><th>PE</th><th>PP</th><th>GF</th><th>GC</th><th>DG</th><th>PTS</th>` +
           `</tr>${rows}` +
         `</table>`
     })
