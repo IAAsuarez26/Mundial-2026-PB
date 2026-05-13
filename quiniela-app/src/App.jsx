@@ -21,7 +21,8 @@ function App() {
   const [userEmail, setUserEmail] = useState('')
   const [predictions, setPredictions] = useState({})
   const [expandedJornadas, setExpandedJornadas] = useState({})
-  const [showGroups, setShowGroups] = useState(true)
+  const [showGroups, setShowGroups] = useState(false)
+  const [hasAutoOpenedGroups, setHasAutoOpenedGroups] = useState(false)
 
   // Dynamic Data State
   const [teams, setTeams] = useState([])
@@ -95,6 +96,34 @@ function App() {
 
     fetchData()
   }, [])
+
+  // Auto-expand Posiciones por grupo when all group stage matches (1-72) are filled
+  useEffect(() => {
+    if (matches.length === 0 || hasAutoOpenedGroups) return;
+    
+    const groupMatches = matches.filter(m => m.id <= 72);
+    if (groupMatches.length === 0) return;
+
+    const allFilled = groupMatches.every(m => {
+      const pred = predictions[m.id];
+      return pred && 
+             pred.team1 !== null && pred.team1 !== undefined && pred.team1 !== '' &&
+             pred.team2 !== null && pred.team2 !== undefined && pred.team2 !== '';
+    });
+
+    if (allFilled) {
+      setShowGroups(true);
+      setHasAutoOpenedGroups(true);
+      
+      // Auto-scroll to the groups section smoothly
+      setTimeout(() => {
+        const groupsSection = document.getElementById('groups-section-id');
+        if (groupsSection) {
+          groupsSection.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 100);
+    }
+  }, [predictions, matches, hasAutoOpenedGroups]);
 
   // Handle score change for user predictions
   const handleScoreChange = (matchId, team, score) => {
@@ -663,7 +692,7 @@ function App() {
 
 
 
-          <section className="groups-section" style={{marginTop: '3rem'}}>
+          <section id="groups-section-id" className="groups-section" style={{marginTop: '3rem'}}>
             <div 
               className="jornada-header-toggle glass-panel" 
               onClick={() => setShowGroups(prev => !prev)}
