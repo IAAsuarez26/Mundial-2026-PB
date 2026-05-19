@@ -239,38 +239,26 @@ function App() {
         updated_at: new Date().toISOString()
       })
 
-      // 2. Check existing quinielas for this cedula
+      // 2. Check if this cedula already has a quiniela registered (NO updates allowed through the app)
       const { data: existing } = await supabase
         .from('quinielas')
-        .select('id, nombre')
+        .select('id')
         .eq('cedula', userCedula.trim())
 
-      const toUpdate = existing?.find(q => q.nombre.trim().toLowerCase() === userName.trim().toLowerCase())
-
-      if (!toUpdate && existing && existing.length >= 1) {
-        alert("Este documento de identidad ya tiene una quiniela registrada. Solo se permite 1 quiniela por participante. Si deseas actualizar tus pronósticos, usa exactamente el mismo nombre (apodo) con el que te registraste.")
+      if (existing && existing.length >= 1) {
+        alert("⚠️ Este documento de identidad ya tiene una quiniela registrada.\n\nSolo se permite UNA quiniela por participante. Si necesitas modificar tus pronósticos, debes comunicarte con el administrador para que elimine tu registro y puedas volver a participar.")
         setIsSaving(false)
         return
       }
 
-      if (toUpdate) {
-        // Update existing quiniela entry
-        const { error } = await supabase.from('quinielas').update({
-          predicciones: predictions,
-          email: userEmail.trim(),
-          updated_at: new Date().toISOString()
-        }).eq('id', toUpdate.id)
-        if (error) throw error
-      } else {
-        // Insert new quiniela entry
-        const { error } = await supabase.from('quinielas').insert({
-          nombre: userName.trim(),
-          cedula: userCedula.trim(),
-          email: userEmail.trim(),
-          predicciones: predictions
-        })
-        if (error) throw error
-      }
+      // Insert new quiniela entry (only if no prior registration exists)
+      const { error } = await supabase.from('quinielas').insert({
+        nombre: userName.trim(),
+        cedula: userCedula.trim(),
+        email: userEmail.trim(),
+        predicciones: predictions
+      })
+      if (error) throw error
 
       try {
         await sendEmail()
