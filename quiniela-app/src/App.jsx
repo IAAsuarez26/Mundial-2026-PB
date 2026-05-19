@@ -1037,7 +1037,7 @@ function App() {
         <div className="modal-overlay" onClick={() => setShowRulesModal(false)}>
           <div className="modal-content glass-panel" onClick={e => e.stopPropagation()}>
             <button className="close-modal" onClick={() => setShowRulesModal(false)}>&times;</button>
-            <h2 className="text-gradient">Reglamento Mundial de Fútbol 2026</h2>
+            <h2 className="text-gradient">Reglamento Mundial de Fútbol 2026 P&B</h2>
 
             <div className="rules-section">
               <h3>⚽ Sistema de Puntuación (Fase de Grupos)</h3>
