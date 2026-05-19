@@ -247,8 +247,8 @@ function App() {
 
       const toUpdate = existing?.find(q => q.nombre.trim().toLowerCase() === userName.trim().toLowerCase())
 
-      if (!toUpdate && existing && existing.length >= 3) {
-        alert("Ya tienes 3 quinielas registradas con esta cédula. No puedes crear más (puedes usar el mismo nombre para actualizar una existente).")
+      if (!toUpdate && existing && existing.length >= 1) {
+        alert("Este documento de identidad ya tiene una quiniela registrada. Solo se permite 1 quiniela por participante. Si deseas actualizar tus pronósticos, usa exactamente el mismo nombre (apodo) con el que te registraste.")
         setIsSaving(false)
         return
       }
@@ -1060,7 +1060,7 @@ function App() {
             <div className="rules-section">
               <h3>📋 Condiciones Generales</h3>
               <ul>
-                <li>Se permite un máximo de <strong>3 quinielas</strong> por participante (usando el mismo documento de identidad pero distinto apodo).</li>
+                <li>Se permite <strong>1 quiniela por participante</strong>. Cada documento de identidad (Cédula, DNI o Pasaporte) puede registrarse una única vez.</li>
                 <li>Los pronósticos se pueden realizar hasta 24 horas antes del primer partido del Mundial.</li>
                 <li>La transparencia es total: todos pueden ver los pronósticos de los demás en la pestaña de Ranking.</li>
               </ul>
