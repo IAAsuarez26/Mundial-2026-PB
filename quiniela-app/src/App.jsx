@@ -100,21 +100,21 @@ function App() {
   // Auto-expand Posiciones por grupo when all group stage matches (1-72) are filled
   useEffect(() => {
     if (matches.length === 0 || hasAutoOpenedGroups) return;
-    
+
     const groupMatches = matches.filter(m => m.id <= 72);
     if (groupMatches.length === 0) return;
 
     const allFilled = groupMatches.every(m => {
       const pred = predictions[m.id];
-      return pred && 
-             pred.team1 !== null && pred.team1 !== undefined && pred.team1 !== '' &&
-             pred.team2 !== null && pred.team2 !== undefined && pred.team2 !== '';
+      return pred &&
+        pred.team1 !== null && pred.team1 !== undefined && pred.team1 !== '' &&
+        pred.team2 !== null && pred.team2 !== undefined && pred.team2 !== '';
     });
 
     if (allFilled) {
       setShowGroups(true);
       setHasAutoOpenedGroups(true);
-      
+
       // Auto-scroll to the groups section smoothly
       setTimeout(() => {
         const groupsSection = document.getElementById('groups-section-id');
@@ -151,8 +151,8 @@ function App() {
     setIsSaving(true)
     try {
       const resultsArray = Object.entries(realResults)
-        .filter(([id, scores]) => scores.team1 !== null && scores.team1 !== undefined && scores.team1 !== '' && 
-                                  scores.team2 !== null && scores.team2 !== undefined && scores.team2 !== '')
+        .filter(([id, scores]) => scores.team1 !== null && scores.team1 !== undefined && scores.team1 !== '' &&
+          scores.team2 !== null && scores.team2 !== undefined && scores.team2 !== '')
         .map(([id, scores]) => ({
           match_id: parseInt(id),
           score_team1: scores.team1,
@@ -190,7 +190,7 @@ function App() {
         }
         return m
       }))
-      
+
       alert('¡Resultados Reales guardados exitosamente!')
     } catch (err) {
       console.error(err)
@@ -229,7 +229,7 @@ function App() {
     }
 
     setIsSaving(true)
-    
+
     try {
       // 1. Ensure the participant profile exists or is updated
       await supabase.from('participantes').upsert({
@@ -244,7 +244,7 @@ function App() {
         .from('quinielas')
         .select('id, nombre')
         .eq('cedula', userCedula.trim())
-      
+
       const toUpdate = existing?.find(q => q.nombre.trim().toLowerCase() === userName.trim().toLowerCase())
 
       if (!toUpdate && existing && existing.length >= 3) {
@@ -278,9 +278,9 @@ function App() {
       } catch (emailErr) {
         console.error("Email failed:", emailErr)
         // Even if email fails, it was saved in DB
-        setShowSuccessModal(true) 
+        setShowSuccessModal(true)
       }
-      
+
       // resetForm() // We might want to keep the data visible for a moment
       // window.location.reload() 
     } catch (err) {
@@ -306,7 +306,7 @@ function App() {
         const dgColor = team.goalDiff > 0 ? '#27ae60' : team.goalDiff < 0 ? '#e74c3c' : '#444'
         const bg = i % 2 === 0 ? '#fff' : '#f5f5f5'
         return `<tr align="center" bgcolor="${bg}">` +
-          `<td style="color:#999">${i+1}.</td>` +
+          `<td style="color:#999">${i + 1}.</td>` +
           `<td align="left" style="font-weight:700">${team.name}</td>` +
           `<td>${team.played}</td>` +
           `<td>${team.won}</td>` +
@@ -316,16 +316,16 @@ function App() {
           `<td>${team.goalsAgainst}</td>` +
           `<td style="color:${dgColor};font-weight:700">${dg}</td>` +
           `<td style="font-weight:900;color:#003366">${team.points}</td>` +
-        `</tr>`
+          `</tr>`
       }).join('')
 
       standingsHTML +=
         `<p style="font-weight:700;color:#003366;font-size:13px;margin:14px 0 3px">GRUPO ${groupName}</p>` +
         `<table width="100%" cellpadding="4" cellspacing="0" border="1" bordercolor="#dddddd" style="border-collapse:collapse;font-size:11px;margin-bottom:14px">` +
-          `<tr align="center" bgcolor="#003366" style="color:#fff">` +
-            `<th colspan="2" align="left">Equipo</th>` +
-            `<th>PJ</th><th>PG</th><th>PE</th><th>PP</th><th>GF</th><th>GC</th><th>DG</th><th>PTS</th>` +
-          `</tr>${rows}` +
+        `<tr align="center" bgcolor="#003366" style="color:#fff">` +
+        `<th colspan="2" align="left">Equipo</th>` +
+        `<th>PJ</th><th>PG</th><th>PE</th><th>PP</th><th>GF</th><th>GC</th><th>DG</th><th>PTS</th>` +
+        `</tr>${rows}` +
         `</table>`
     })
 
@@ -336,7 +336,7 @@ function App() {
         const p = predictions[m.id]
         return `<tr><td style="padding:4px 6px;border-bottom:1px solid #eee;font-size:11px">` +
           `<b>${m.id}.</b> ${getTeamName(m.team1_id)} <b>${p.team1} – ${p.team2}</b> ${getTeamName(m.team2_id)}` +
-        `</td></tr>`
+          `</td></tr>`
       }).join('')
 
     const matchesHTML = `<table width="100%" cellspacing="0" style="border-collapse:collapse">${matchRows}</table>`
@@ -345,18 +345,18 @@ function App() {
     const emailHTML =
       `<div style="background:#f0f2f5;padding:16px;font-family:Arial,sans-serif">` +
       `<table width="100%" style="max-width:600px;margin:0 auto;background:#003366;border-radius:8px 8px 0 0">` +
-        `<tr><td style="padding:18px;text-align:center">` +
-          `<h1 style="color:#fff;margin:0;font-size:20px">Posiciones según tus Pronósticos</h1>` +
-          `<p style="color:#aad4f5;margin:6px 0 0;font-size:13px">Quiniela Mundial 2026 · ${userName}</p>` +
-        `</td></tr>` +
+      `<tr><td style="padding:18px;text-align:center">` +
+      `<h1 style="color:#fff;margin:0;font-size:20px">Posiciones según tus Pronósticos</h1>` +
+      `<p style="color:#aad4f5;margin:6px 0 0;font-size:13px">Quiniela Mundial 2026 · ${userName}</p>` +
+      `</td></tr>` +
       `</table>` +
       `<table width="100%" style="max-width:600px;margin:0 auto;background:#fff;border-radius:0 0 8px 8px">` +
-        `<tr><td style="padding:20px">` +
-          `<h2 style="color:#003366;border-bottom:2px solid #eee;padding-bottom:8px;font-size:15px;margin-top:0">Posiciones Proyectadas</h2>` +
-          standingsHTML +
-          `<h2 style="color:#003366;border-bottom:2px solid #eee;padding-bottom:8px;font-size:15px;margin-top:20px">Tus Pronósticos</h2>` +
-          matchesHTML +
-        `</td></tr>` +
+      `<tr><td style="padding:20px">` +
+      `<h2 style="color:#003366;border-bottom:2px solid #eee;padding-bottom:8px;font-size:15px;margin-top:0">Posiciones Proyectadas</h2>` +
+      standingsHTML +
+      `<h2 style="color:#003366;border-bottom:2px solid #eee;padding-bottom:8px;font-size:15px;margin-top:20px">Tus Pronósticos</h2>` +
+      matchesHTML +
+      `</td></tr>` +
       `</table>` +
       `<p style="text-align:center;font-size:11px;color:#999;margin-top:10px">Enviado automáticamente · Quiniela Mundial 2026</p>` +
       `</div>`
@@ -376,14 +376,14 @@ function App() {
     }
 
     console.log(`[Email] HTML size: ${emailHTML.length} chars`)
-    console.log(`[Email] DEBUG ENV VARS -> Service: "${SERVICE_ID}", Template: "${TEMPLATE_ID}", PublicKey: "${PUBLIC_KEY ? PUBLIC_KEY.substring(0,4) + '...' : 'MISSING'}"`)
+    console.log(`[Email] DEBUG ENV VARS -> Service: "${SERVICE_ID}", Template: "${TEMPLATE_ID}", PublicKey: "${PUBLIC_KEY ? PUBLIC_KEY.substring(0, 4) + '...' : 'MISSING'}"`)
 
     return emailjs.send(SERVICE_ID, TEMPLATE_ID, templateParams, PUBLIC_KEY)
       .then((response) => {
-         console.log('[Email] SUCCESS!', response.status, response.text);
+        console.log('[Email] SUCCESS!', response.status, response.text);
       }, (err) => {
-         console.error('[Email] FAILED:', err);
-         throw err
+        console.error('[Email] FAILED:', err);
+        throw err
       });
   }
 
@@ -417,9 +417,9 @@ function App() {
 
     matches.forEach(match => {
       const pred = matchData[match.id]
-      if (pred && pred.team1 !== undefined && pred.team1 !== null && 
-          pred.team2 !== undefined && pred.team2 !== null) {
-        
+      if (pred && pred.team1 !== undefined && pred.team1 !== null &&
+        pred.team2 !== undefined && pred.team2 !== null) {
+
         let matchGroup = null
         let t1Index = -1
         let t2Index = -1
@@ -438,7 +438,7 @@ function App() {
         if (matchGroup) {
           const s1 = pred.team1
           const s2 = pred.team2
-          
+
           const team1 = standings[matchGroup][t1Index]
           const team2 = standings[matchGroup][t2Index]
 
@@ -446,7 +446,7 @@ function App() {
           team1.goalsAgainst += s2
           team1.goalDiff += (s1 - s2)
           team1.played += 1
-          
+
           team2.goalsFor += s2
           team2.goalsAgainst += s1
           team2.goalDiff += (s2 - s1)
@@ -488,10 +488,10 @@ function App() {
   const rankingInfo = useMemo(() => {
     let playedMatchesCount = 0
     const groupMatches = matches.filter(m => m.id <= 72)
-    
+
     groupMatches.forEach(match => {
       if (match.score_team1 !== null && match.score_team2 !== null) {
-          playedMatchesCount += 1
+        playedMatchesCount += 1
       }
     })
 
@@ -505,7 +505,7 @@ function App() {
       let exactMatches = 0
       let partialMatches = 0
       const matchPoints = {}
-      
+
       const userPreds = userData.predictions
       const userName = userData.name
 
@@ -514,30 +514,30 @@ function App() {
         const real1 = match.score_team1
         const real2 = match.score_team2
         const pred = userPreds[match.id]
-        
-        if (real1 !== null && real2 !== null && pred && pred.team1 !== null && pred.team2 !== null) {
-            const realDiff = real1 - real2
-            const predDiff = pred.team1 - pred.team2
-            const realSign = Math.sign(realDiff)
-            const predSign = Math.sign(predDiff)
 
-            if (real1 === pred.team1 && real2 === pred.team2) {
-              pts = 5
-              exactMatches += 1
-            } else if (realDiff === predDiff) {
-              pts = 3
-              partialMatches += 1
-            } else if (realSign === predSign && realSign !== 0) {
-              pts = 1
-              partialMatches += 1
-            }
-            points += pts
+        if (real1 !== null && real2 !== null && pred && pred.team1 !== null && pred.team2 !== null) {
+          const realDiff = real1 - real2
+          const predDiff = pred.team1 - pred.team2
+          const realSign = Math.sign(realDiff)
+          const predSign = Math.sign(predDiff)
+
+          if (real1 === pred.team1 && real2 === pred.team2) {
+            pts = 5
+            exactMatches += 1
+          } else if (realDiff === predDiff) {
+            pts = 3
+            partialMatches += 1
+          } else if (realSign === predSign && realSign !== 0) {
+            pts = 1
+            partialMatches += 1
+          }
+          points += pts
         }
         matchPoints[match.id] = pts
       })
       scores.push({ id, name: userName, points, exactMatches, partialMatches, matchPoints, predictions: userPreds })
     }
-    
+
     return {
       playedMatches: playedMatchesCount,
       remainingMatches,
@@ -552,30 +552,30 @@ function App() {
     <div className="app-container">
       <div className="banner-triptych" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '2rem', marginBottom: '2.5rem', width: '100%' }}>
         <div className="banner-item float-anim" style={{ width: '25%', display: 'flex', justifyContent: 'center', alignItems: 'center', animationDelay: '0s' }}>
-          <img 
-            src={trophyImg} 
-            alt="Copa del Mundo" 
+          <img
+            src={trophyImg}
+            alt="Copa del Mundo"
             style={{ width: '100%', height: 'auto', display: 'block', opacity: '0.95', pointerEvents: 'none' }}
           />
         </div>
         <div className="banner-item glass-panel" style={{ width: '25%', overflow: 'hidden', border: '1px solid rgba(0, 242, 254, 0.3)', boxShadow: '0 10px 40px rgba(0, 0, 0, 0.6)' }}>
-          <img 
-            src="https://images.unsplash.com/photo-1579952363873-27f3bade9f55?q=80&w=1600&auto=format&fit=crop" 
-            alt="Botín y Balón" 
+          <img
+            src="https://images.unsplash.com/photo-1579952363873-27f3bade9f55?q=80&w=1600&auto=format&fit=crop"
+            alt="Botín y Balón"
             style={{ width: '100%', height: 'auto', display: 'block', opacity: '0.9', pointerEvents: 'none' }}
           />
         </div>
         <div className="banner-item float-anim" style={{ width: '25%', display: 'flex', justifyContent: 'center', alignItems: 'center', animationDelay: '1s' }}>
-          <img 
-            src={mascotImg} 
-            alt="Mascotas Mundial 2026" 
+          <img
+            src={mascotImg}
+            alt="Mascotas Mundial 2026"
             style={{ width: '100%', height: 'auto', display: 'block', opacity: '0.95', pointerEvents: 'none' }}
           />
         </div>
       </div>
       <header className="header">
-        <h1 style={{display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '15px'}}>
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{color: 'var(--primary-color)'}}>
+        <h1 style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '15px' }}>
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--primary-color)' }}>
             <circle cx="12" cy="12" r="10" />
             <path d="M12 2a4.5 4.5 0 0 0 0 9" />
             <path d="M12 13a4.5 4.5 0 0 0 0 9" />
@@ -586,6 +586,9 @@ function App() {
           </svg>
           Quiniela Mundial de Fútbol <span className="text-gradient">2026</span>
         </h1>
+        <p className="text-gradient" style={{ fontSize: '1.8rem', fontWeight: '800', marginTop: '0.2rem', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+          Ponce & Benzo
+        </p>
         <div className="nav-tabs">
           <div className="tabs-center">
             <button className={`tab-btn ${currentView === 'predict' ? 'active' : ''}`} onClick={() => setCurrentView('predict')}>Mis Predicciones</button>
@@ -599,26 +602,26 @@ function App() {
 
       {currentView === 'predict' && (
         <>
-          <div className="user-input-section" style={{display: 'flex', flexDirection: 'column', gap: '1rem'}}>
-            <div style={{display: 'flex', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap'}}>
-              <input 
-                type="text" 
-                className="user-name-input glass-panel" 
+          <div className="user-input-section" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+              <input
+                type="text"
+                className="user-name-input glass-panel"
                 placeholder="Cédula / DNI / Pasaporte"
                 title="Documento de Identidad"
                 value={userCedula}
                 onChange={(e) => setUserCedula(e.target.value)}
               />
-              <input 
-                type="text" 
-                className="user-name-input glass-panel" 
+              <input
+                type="text"
+                className="user-name-input glass-panel"
                 placeholder="Nombre / Apodo"
                 value={userName}
                 onChange={(e) => setUserName(e.target.value)}
               />
-              <input 
-                type="email" 
-                className="user-name-input glass-panel" 
+              <input
+                type="email"
+                className="user-name-input glass-panel"
                 placeholder="Correo Electrónico"
                 value={userEmail}
                 onChange={(e) => setUserEmail(e.target.value)}
@@ -629,7 +632,7 @@ function App() {
 
 
           <section className="matches-section">
-            <h2 className="matches-header text-gradient" style={{marginBottom: '2rem'}}>Fase de Grupos</h2>
+            <h2 className="matches-header text-gradient" style={{ marginBottom: '2rem' }}>Fase de Grupos</h2>
             {[
               { name: 'Jornada 1', range: [1, 24] },
               { name: 'Jornada 2', range: [25, 48] },
@@ -637,53 +640,53 @@ function App() {
             ].map((jornada, jIdx) => {
               const jornadaMatches = matches.filter(m => m.id >= jornada.range[0] && m.id <= jornada.range[1])
               return (
-                <div key={jornada.name} className="jornada-section" style={{marginBottom: '3rem'}}>
-                  <div 
-                    className="jornada-header-toggle glass-panel" 
+                <div key={jornada.name} className="jornada-section" style={{ marginBottom: '3rem' }}>
+                  <div
+                    className="jornada-header-toggle glass-panel"
                     onClick={() => toggleJornada(jornada.name)}
-                    style={{cursor: 'pointer', padding: '1rem', marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}
+                    style={{ cursor: 'pointer', padding: '1rem', marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
                   >
-                    <h3 className="text-gradient" style={{margin: 0, fontSize: '1.5rem'}}>{jornada.name}</h3>
-                    <span style={{fontSize: '1.5rem'}}>{expandedJornadas[jornada.name] ? '▲' : '▼'}</span>
+                    <h3 className="text-gradient" style={{ margin: 0, fontSize: '1.5rem' }}>{jornada.name}</h3>
+                    <span style={{ fontSize: '1.5rem' }}>{expandedJornadas[jornada.name] ? '▲' : '▼'}</span>
                   </div>
                   {expandedJornadas[jornada.name] && (
-                  <div className="matches-grid">
-                    {jornadaMatches.map((match, idx) => {
-                      const dateStr = match.date ? new Date(match.date).toLocaleDateString() : 'TBD'
-                      const started = isMatchStarted(match.date)
-                      const pred = predictions[match.id]
-                      const isFilled = pred && pred.team1 !== null && pred.team1 !== undefined && pred.team1 !== '' && pred.team2 !== null && pred.team2 !== undefined && pred.team2 !== ''
-                      
-                      return (
-                        <div key={match.id} className={`glass-panel match-card ${started ? 'match-started' : ''} ${isFilled ? 'prediction-filled' : ''}`} style={{ animationDelay: `${(idx % 10) * 0.05}s` }}>
-                          <div className="match-info">
-                            Partido {match.id} | {dateStr} {started && <span className="started-badge">Iniciado / Finalizado</span>}
+                    <div className="matches-grid">
+                      {jornadaMatches.map((match, idx) => {
+                        const dateStr = match.date ? new Date(match.date).toLocaleDateString() : 'TBD'
+                        const started = isMatchStarted(match.date)
+                        const pred = predictions[match.id]
+                        const isFilled = pred && pred.team1 !== null && pred.team1 !== undefined && pred.team1 !== '' && pred.team2 !== null && pred.team2 !== undefined && pred.team2 !== ''
+
+                        return (
+                          <div key={match.id} className={`glass-panel match-card ${started ? 'match-started' : ''} ${isFilled ? 'prediction-filled' : ''}`} style={{ animationDelay: `${(idx % 10) * 0.05}s` }}>
+                            <div className="match-info">
+                              Partido {match.id} | {dateStr} {started && <span className="started-badge">Iniciado / Finalizado</span>}
+                            </div>
+                            <div className="match-teams">
+                              <div className="team">{getTeamName(match.team1_id)}</div>
+                              <input
+                                type="number" min="0" className="team-input"
+                                value={predictions[match.id]?.team1 ?? ''}
+                                onChange={(e) => handleScoreChange(match.id, 'team1', e.target.value)}
+                                onKeyDown={(e) => ['e', 'E', '+', '-', '.', ','].includes(e.key) && e.preventDefault()}
+                                placeholder="0"
+                                disabled={started}
+                              />
+                              <span className="vs-badge">VS</span>
+                              <input
+                                type="number" min="0" className="team-input"
+                                value={predictions[match.id]?.team2 ?? ''}
+                                onChange={(e) => handleScoreChange(match.id, 'team2', e.target.value)}
+                                onKeyDown={(e) => ['e', 'E', '+', '-', '.', ','].includes(e.key) && e.preventDefault()}
+                                placeholder="0"
+                                disabled={started}
+                              />
+                              <div className="team">{getTeamName(match.team2_id)}</div>
+                            </div>
                           </div>
-                          <div className="match-teams">
-                            <div className="team">{getTeamName(match.team1_id)}</div>
-                            <input 
-                              type="number" min="0" className="team-input"
-                              value={predictions[match.id]?.team1 ?? ''}
-                              onChange={(e) => handleScoreChange(match.id, 'team1', e.target.value)}
-                              onKeyDown={(e) => ['e', 'E', '+', '-', '.', ','].includes(e.key) && e.preventDefault()}
-                              placeholder="0"
-                              disabled={started}
-                            />
-                            <span className="vs-badge">VS</span>
-                            <input 
-                              type="number" min="0" className="team-input"
-                              value={predictions[match.id]?.team2 ?? ''}
-                              onChange={(e) => handleScoreChange(match.id, 'team2', e.target.value)}
-                              onKeyDown={(e) => ['e', 'E', '+', '-', '.', ','].includes(e.key) && e.preventDefault()}
-                              placeholder="0"
-                              disabled={started}
-                            />
-                            <div className="team">{getTeamName(match.team2_id)}</div>
-                          </div>
-                        </div>
-                      )
-                    })}
-                  </div>
+                        )
+                      })}
+                    </div>
                   )}
                 </div>
               )
@@ -692,82 +695,82 @@ function App() {
 
 
 
-          <section id="groups-section-id" className="groups-section" style={{marginTop: '3rem'}}>
-            <div 
-              className="jornada-header-toggle glass-panel" 
+          <section id="groups-section-id" className="groups-section" style={{ marginTop: '3rem' }}>
+            <div
+              className="jornada-header-toggle glass-panel"
               onClick={() => setShowGroups(prev => !prev)}
-              style={{cursor: 'pointer', padding: '1rem', marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}
+              style={{ cursor: 'pointer', padding: '1rem', marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
             >
-              <h3 className="text-gradient" style={{margin: 0, fontSize: '1.5rem'}}>Posiciones por grupo</h3>
-              <span style={{fontSize: '1.5rem'}}>{showGroups ? '▲' : '▼'}</span>
+              <h3 className="text-gradient" style={{ margin: 0, fontSize: '1.5rem' }}>Posiciones por grupo</h3>
+              <span style={{ fontSize: '1.5rem' }}>{showGroups ? '▲' : '▼'}</span>
             </div>
             {showGroups && (
-            <div className="groups-grid">
-              {Object.entries(groupStandings).map(([groupName, teams], idx) => (
-                <div key={groupName} className="glass-panel group-card" style={{ animationDelay: `${idx * 0.05}s` }}>
-                  <div className="group-header">
-                    <h2 className="group-title">Grupo {groupName}</h2>
-                  </div>
-                  <ul className="team-list">
-                    <li className="team-item team-header">
-                      <span className="team-name" style={{fontSize: '0.8rem'}}>Equipo</span>
-                      <div className="team-stats">
-                        <span className="stat-label" title="Partidos Jugados">PJ</span>
-                        <span className="stat-label" title="Partidos Ganados">PG</span>
-                        <span className="stat-label" title="Partidos Empatados">PE</span>
-                        <span className="stat-label" title="Partidos Perdidos">PP</span>
-                        <span className="stat-label" title="Goles a Favor">GF</span>
-                        <span className="stat-label" title="Goles en Contra">GC</span>
-                        <span className="stat-label" title="Diferencia de Goles">DG</span>
-                        <span className="stat-label" title="Puntos" style={{color: 'var(--primary-color)'}}>PTS</span>
-                      </div>
-                    </li>
-                    {teams.map((team, index) => (
-                      <li key={team.id} className="team-item">
-                        <span className="team-name">{index + 1}. {team.name}</span>
+              <div className="groups-grid">
+                {Object.entries(groupStandings).map(([groupName, teams], idx) => (
+                  <div key={groupName} className="glass-panel group-card" style={{ animationDelay: `${idx * 0.05}s` }}>
+                    <div className="group-header">
+                      <h2 className="group-title">Grupo {groupName}</h2>
+                    </div>
+                    <ul className="team-list">
+                      <li className="team-item team-header">
+                        <span className="team-name" style={{ fontSize: '0.8rem' }}>Equipo</span>
                         <div className="team-stats">
-                          <span className="stat-val">{team.played}</span>
-                          <span className="stat-val">{team.won}</span>
-                          <span className="stat-val">{team.drawn}</span>
-                          <span className="stat-val">{team.lost}</span>
-                          <span className="stat-val">{team.goalsFor}</span>
-                          <span className="stat-val">{team.goalsAgainst}</span>
-                          <span className="stat-val">{team.goalDiff > 0 ? `+${team.goalDiff}` : team.goalDiff}</span>
-                          <span className="team-points">{team.points}</span>
+                          <span className="stat-label" title="Partidos Jugados">PJ</span>
+                          <span className="stat-label" title="Partidos Ganados">PG</span>
+                          <span className="stat-label" title="Partidos Empatados">PE</span>
+                          <span className="stat-label" title="Partidos Perdidos">PP</span>
+                          <span className="stat-label" title="Goles a Favor">GF</span>
+                          <span className="stat-label" title="Goles en Contra">GC</span>
+                          <span className="stat-label" title="Diferencia de Goles">DG</span>
+                          <span className="stat-label" title="Puntos" style={{ color: 'var(--primary-color)' }}>PTS</span>
                         </div>
                       </li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
-            </div>
+                      {teams.map((team, index) => (
+                        <li key={team.id} className="team-item">
+                          <span className="team-name">{index + 1}. {team.name}</span>
+                          <div className="team-stats">
+                            <span className="stat-val">{team.played}</span>
+                            <span className="stat-val">{team.won}</span>
+                            <span className="stat-val">{team.drawn}</span>
+                            <span className="stat-val">{team.lost}</span>
+                            <span className="stat-val">{team.goalsFor}</span>
+                            <span className="stat-val">{team.goalsAgainst}</span>
+                            <span className="stat-val">{team.goalDiff > 0 ? `+${team.goalDiff}` : team.goalDiff}</span>
+                            <span className="team-points">{team.points}</span>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
             )}
           </section>
 
-          <div style={{display: 'flex', justifyContent: 'center', marginTop: '3rem', marginBottom: '3rem'}}>
-            <button className="save-btn" onClick={savePredictions} disabled={isSaving} style={{padding: '1.2rem 3rem', fontSize: '1.2rem'}}>
+          <div style={{ display: 'flex', justifyContent: 'center', marginTop: '3rem', marginBottom: '3rem' }}>
+            <button className="save-btn" onClick={savePredictions} disabled={isSaving} style={{ padding: '1.2rem 3rem', fontSize: '1.2rem' }}>
               {isSaving ? 'Guardando...' : '¡Guardar mi Quiniela!'}
             </button>
           </div>
 
           {showSuccessModal && (
             <div className="modal-overlay">
-              <div className="modal-content glass-panel" style={{textAlign: 'center', maxWidth: '450px'}}>
-                <div style={{marginBottom: '1rem'}}>
+              <div className="modal-content glass-panel" style={{ textAlign: 'center', maxWidth: '450px' }}>
+                <div style={{ marginBottom: '1rem' }}>
                   <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#2ecc71" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
                     <polyline points="22 4 12 14.01 9 11.01"></polyline>
                   </svg>
                 </div>
-                <h2 className="text-gradient" style={{margin: '0 0 1rem'}}>¡Quiniela Guardada!</h2>
-                <p style={{fontSize: '1.05rem', color: 'var(--text-muted)', lineHeight: '1.7', marginBottom: '0.5rem'}}>
-                  Tus pronósticos han sido guardados <strong style={{color: '#2ecc71'}}>exitosamente</strong>.
+                <h2 className="text-gradient" style={{ margin: '0 0 1rem' }}>¡Quiniela Guardada!</h2>
+                <p style={{ fontSize: '1.05rem', color: 'var(--text-muted)', lineHeight: '1.7', marginBottom: '0.5rem' }}>
+                  Tus pronósticos han sido guardados <strong style={{ color: '#2ecc71' }}>exitosamente</strong>.
                 </p>
-                <p style={{fontSize: '1.05rem', color: 'var(--text-muted)', lineHeight: '1.7', marginBottom: '2rem'}}>
-                  Se ha enviado un reporte detallado a:<br/>
-                  <strong style={{color: 'white'}}>{userEmail}</strong>
+                <p style={{ fontSize: '1.05rem', color: 'var(--text-muted)', lineHeight: '1.7', marginBottom: '2rem' }}>
+                  Se ha enviado un reporte detallado a:<br />
+                  <strong style={{ color: 'white' }}>{userEmail}</strong>
                 </p>
-                <button className="save-btn" onClick={() => window.location.reload()} style={{width: '100%', fontSize: '1.1rem'}}>
+                <button className="save-btn" onClick={() => window.location.reload()} style={{ width: '100%', fontSize: '1.1rem' }}>
                   ¡Entendido!
                 </button>
               </div>
@@ -779,20 +782,20 @@ function App() {
       {currentView === 'admin' && (
         <>
           {!isAdminAuthenticated ? (
-            <div className="glass-panel" style={{maxWidth: '400px', margin: '4rem auto', padding: '2rem', textAlign: 'center'}}>
-              <h3 className="text-gradient" style={{marginBottom: '1.5rem'}}>Acceso Restringido</h3>
-              <input 
-                type="password" 
-                className="user-name-input glass-panel" 
-                style={{width: '100%', marginBottom: '1.5rem'}}
+            <div className="glass-panel" style={{ maxWidth: '400px', margin: '4rem auto', padding: '2rem', textAlign: 'center' }}>
+              <h3 className="text-gradient" style={{ marginBottom: '1.5rem' }}>Acceso Restringido</h3>
+              <input
+                type="password"
+                className="user-name-input glass-panel"
+                style={{ width: '100%', marginBottom: '1.5rem' }}
                 placeholder="Contraseña de Administrador"
                 value={adminPassAttempt}
                 onChange={(e) => setAdminPassAttempt(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && setIsAdminAuthenticated(adminPassAttempt === 'P3trusk$17')}
               />
-              <button 
-                className="save-btn" 
-                style={{width: '100%'}} 
+              <button
+                className="save-btn"
+                style={{ width: '100%' }}
                 onClick={() => {
                   if (adminPassAttempt === 'P3trusk$17') {
                     setIsAdminAuthenticated(true)
@@ -806,155 +809,155 @@ function App() {
             </div>
           ) : (
             <>
-              <div className="header" style={{marginBottom: '1rem'}}>
-                <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+              <div className="header" style={{ marginBottom: '1rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <h2>Resultados Reales</h2>
-                  <button className="tab-btn" onClick={() => setIsAdminAuthenticated(false)} style={{padding: '5px 15px', fontSize: '0.8rem'}}>Salir</button>
+                  <button className="tab-btn" onClick={() => setIsAdminAuthenticated(false)} style={{ padding: '5px 15px', fontSize: '0.8rem' }}>Salir</button>
                 </div>
                 <p>Ingresa los resultados oficiales para calcular los puntos de todos.</p>
               </div>
 
-              <div style={{display: 'flex', justifyContent: 'center'}}>
-                <button className="save-btn" onClick={saveRealResults} style={{marginTop: 0, marginBottom: '2rem'}} disabled={isSaving}>
+              <div style={{ display: 'flex', justifyContent: 'center' }}>
+                <button className="save-btn" onClick={saveRealResults} style={{ marginTop: 0, marginBottom: '2rem' }} disabled={isSaving}>
                   {isSaving ? 'Guardando...' : 'Guardar Resultados Reales'}
                 </button>
               </div>
-          
-          <section className="groups-section" style={{marginBottom: '3rem'}}>
-            <div 
-              className="jornada-header-toggle glass-panel" 
-              onClick={() => setShowGroups(prev => !prev)}
-              style={{cursor: 'pointer', padding: '1rem', marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}
-            >
-              <h3 className="text-gradient" style={{margin: 0, fontSize: '1.5rem'}}>Posiciones Reales (Grupos)</h3>
-              <span style={{fontSize: '1.5rem'}}>{showGroups ? '▲' : '▼'}</span>
-            </div>
-            {showGroups && (
-            <div className="groups-grid">
-              {Object.entries(realStandings).map(([groupName, teams], idx) => (
-                <div key={groupName} className="glass-panel group-card" style={{ animationDelay: `${idx * 0.05}s` }}>
-                  <div className="group-header">
-                    <h2 className="group-title">Grupo {groupName}</h2>
-                  </div>
-                  <ul className="team-list">
-                    <li className="team-item team-header">
-                      <span className="team-name" style={{fontSize: '0.8rem'}}>Equipo</span>
-                      <div className="team-stats">
-                        <span className="stat-label" title="Partidos Jugados">PJ</span>
-                        <span className="stat-label" title="Partidos Ganados">PG</span>
-                        <span className="stat-label" title="Partidos Empatados">PE</span>
-                        <span className="stat-label" title="Partidos Perdidos">PP</span>
-                        <span className="stat-label" title="Goles a Favor">GF</span>
-                        <span className="stat-label" title="Goles en Contra">GC</span>
-                        <span className="stat-label" title="Diferencia de Goles">DG</span>
-                        <span className="stat-label" title="Puntos" style={{color: 'var(--primary-color)'}}>PTS</span>
-                      </div>
-                    </li>
-                    {teams.map((team, index) => (
-                      <li key={team.id} className="team-item">
-                        <span className="team-name">{index + 1}. {team.name}</span>
-                        <div className="team-stats">
-                          <span className="stat-val">{team.played}</span>
-                          <span className="stat-val">{team.won}</span>
-                          <span className="stat-val">{team.drawn}</span>
-                          <span className="stat-val">{team.lost}</span>
-                          <span className="stat-val">{team.goalsFor}</span>
-                          <span className="stat-val">{team.goalsAgainst}</span>
-                          <span className="stat-val">{team.goalDiff > 0 ? `+${team.goalDiff}` : team.goalDiff}</span>
-                          <span className="team-points">{team.points}</span>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
-            </div>
-            )}
-          </section>
 
-          <section className="matches-section" style={{marginTop: '0'}}>
-            {[
-              { name: 'Jornada 1', range: [1, 24] },
-              { name: 'Jornada 2', range: [25, 48] },
-              { name: 'Jornada 3', range: [49, 72] }
-            ].map((jornada, jIdx) => {
-              const jornadaMatches = matches.filter(m => m.id >= jornada.range[0] && m.id <= jornada.range[1])
-              return (
-                <div key={jornada.name} className="jornada-section" style={{marginBottom: '3rem'}}>
-                  <div 
-                    className="jornada-header-toggle glass-panel" 
-                    onClick={() => toggleJornada(jornada.name)}
-                    style={{cursor: 'pointer', padding: '1rem', marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}
-                  >
-                    <h3 className="text-gradient" style={{margin: 0, fontSize: '1.5rem'}}>{jornada.name}</h3>
-                    <span style={{fontSize: '1.5rem'}}>{expandedJornadas[jornada.name] ? '▲' : '▼'}</span>
-                  </div>
-                  {expandedJornadas[jornada.name] && (
-                  <div className="matches-grid">
-                    {jornadaMatches.map((match, idx) => {
-                      const dateStr = match.date ? new Date(match.date).toLocaleDateString() : 'TBD'
-                      const real = realResults[match.id]
-                      const isFilled = real && real.team1 !== null && real.team1 !== undefined && real.team2 !== null && real.team2 !== undefined
-                      return (
-                        <div key={match.id} className={`glass-panel match-card admin-card ${isFilled ? 'admin-filled' : ''}`}>
-                          <div className="match-info">Partido {match.id} | {dateStr}</div>
-                          <div className="match-teams">
-                            <div className="team">{getTeamName(match.team1_id)}</div>
-                            <input 
-                              type="number" min="0" className="team-input admin-input"
-                              value={realResults[match.id]?.team1 ?? ''}
-                              onChange={(e) => handleRealScoreChange(match.id, 'team1', e.target.value)}
-                              onKeyDown={(e) => ['e', 'E', '+', '-', '.', ','].includes(e.key) && e.preventDefault()}
-                              placeholder="-"
-                            />
-                            <span className="vs-badge">VS</span>
-                            <input 
-                              type="number" min="0" className="team-input admin-input"
-                              value={realResults[match.id]?.team2 ?? ''}
-                              onChange={(e) => handleRealScoreChange(match.id, 'team2', e.target.value)}
-                              onKeyDown={(e) => ['e', 'E', '+', '-', '.', ','].includes(e.key) && e.preventDefault()}
-                              placeholder="-"
-                            />
-                            <div className="team">{getTeamName(match.team2_id)}</div>
-                          </div>
-                        </div>
-                      )
-                    })}
-                  </div>
-                  )}
+              <section className="groups-section" style={{ marginBottom: '3rem' }}>
+                <div
+                  className="jornada-header-toggle glass-panel"
+                  onClick={() => setShowGroups(prev => !prev)}
+                  style={{ cursor: 'pointer', padding: '1rem', marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                >
+                  <h3 className="text-gradient" style={{ margin: 0, fontSize: '1.5rem' }}>Posiciones Reales (Grupos)</h3>
+                  <span style={{ fontSize: '1.5rem' }}>{showGroups ? '▲' : '▼'}</span>
                 </div>
-              )
-            })}
-          </section>
-          </>
+                {showGroups && (
+                  <div className="groups-grid">
+                    {Object.entries(realStandings).map(([groupName, teams], idx) => (
+                      <div key={groupName} className="glass-panel group-card" style={{ animationDelay: `${idx * 0.05}s` }}>
+                        <div className="group-header">
+                          <h2 className="group-title">Grupo {groupName}</h2>
+                        </div>
+                        <ul className="team-list">
+                          <li className="team-item team-header">
+                            <span className="team-name" style={{ fontSize: '0.8rem' }}>Equipo</span>
+                            <div className="team-stats">
+                              <span className="stat-label" title="Partidos Jugados">PJ</span>
+                              <span className="stat-label" title="Partidos Ganados">PG</span>
+                              <span className="stat-label" title="Partidos Empatados">PE</span>
+                              <span className="stat-label" title="Partidos Perdidos">PP</span>
+                              <span className="stat-label" title="Goles a Favor">GF</span>
+                              <span className="stat-label" title="Goles en Contra">GC</span>
+                              <span className="stat-label" title="Diferencia de Goles">DG</span>
+                              <span className="stat-label" title="Puntos" style={{ color: 'var(--primary-color)' }}>PTS</span>
+                            </div>
+                          </li>
+                          {teams.map((team, index) => (
+                            <li key={team.id} className="team-item">
+                              <span className="team-name">{index + 1}. {team.name}</span>
+                              <div className="team-stats">
+                                <span className="stat-val">{team.played}</span>
+                                <span className="stat-val">{team.won}</span>
+                                <span className="stat-val">{team.drawn}</span>
+                                <span className="stat-val">{team.lost}</span>
+                                <span className="stat-val">{team.goalsFor}</span>
+                                <span className="stat-val">{team.goalsAgainst}</span>
+                                <span className="stat-val">{team.goalDiff > 0 ? `+${team.goalDiff}` : team.goalDiff}</span>
+                                <span className="team-points">{team.points}</span>
+                              </div>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </section>
+
+              <section className="matches-section" style={{ marginTop: '0' }}>
+                {[
+                  { name: 'Jornada 1', range: [1, 24] },
+                  { name: 'Jornada 2', range: [25, 48] },
+                  { name: 'Jornada 3', range: [49, 72] }
+                ].map((jornada, jIdx) => {
+                  const jornadaMatches = matches.filter(m => m.id >= jornada.range[0] && m.id <= jornada.range[1])
+                  return (
+                    <div key={jornada.name} className="jornada-section" style={{ marginBottom: '3rem' }}>
+                      <div
+                        className="jornada-header-toggle glass-panel"
+                        onClick={() => toggleJornada(jornada.name)}
+                        style={{ cursor: 'pointer', padding: '1rem', marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                      >
+                        <h3 className="text-gradient" style={{ margin: 0, fontSize: '1.5rem' }}>{jornada.name}</h3>
+                        <span style={{ fontSize: '1.5rem' }}>{expandedJornadas[jornada.name] ? '▲' : '▼'}</span>
+                      </div>
+                      {expandedJornadas[jornada.name] && (
+                        <div className="matches-grid">
+                          {jornadaMatches.map((match, idx) => {
+                            const dateStr = match.date ? new Date(match.date).toLocaleDateString() : 'TBD'
+                            const real = realResults[match.id]
+                            const isFilled = real && real.team1 !== null && real.team1 !== undefined && real.team2 !== null && real.team2 !== undefined
+                            return (
+                              <div key={match.id} className={`glass-panel match-card admin-card ${isFilled ? 'admin-filled' : ''}`}>
+                                <div className="match-info">Partido {match.id} | {dateStr}</div>
+                                <div className="match-teams">
+                                  <div className="team">{getTeamName(match.team1_id)}</div>
+                                  <input
+                                    type="number" min="0" className="team-input admin-input"
+                                    value={realResults[match.id]?.team1 ?? ''}
+                                    onChange={(e) => handleRealScoreChange(match.id, 'team1', e.target.value)}
+                                    onKeyDown={(e) => ['e', 'E', '+', '-', '.', ','].includes(e.key) && e.preventDefault()}
+                                    placeholder="-"
+                                  />
+                                  <span className="vs-badge">VS</span>
+                                  <input
+                                    type="number" min="0" className="team-input admin-input"
+                                    value={realResults[match.id]?.team2 ?? ''}
+                                    onChange={(e) => handleRealScoreChange(match.id, 'team2', e.target.value)}
+                                    onKeyDown={(e) => ['e', 'E', '+', '-', '.', ','].includes(e.key) && e.preventDefault()}
+                                    placeholder="-"
+                                  />
+                                  <div className="team">{getTeamName(match.team2_id)}</div>
+                                </div>
+                              </div>
+                            )
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  )
+                })}
+              </section>
+            </>
           )}
         </>
       )}
 
       {currentView === 'ranking' && (
         <section className="ranking-section">
-          <div className="header" style={{marginBottom: '2rem'}}>
+          <div className="header" style={{ marginBottom: '2rem' }}>
             <h2>Ranking de Quinielas</h2>
           </div>
 
-          <div className="stats-dashboard glass-panel-heavy" style={{marginBottom: '2rem', padding: '1.5rem', display: 'flex', justifyContent: 'space-around', flexWrap: 'wrap', gap: '1rem'}}>
-            <div className="stat-item" style={{textAlign: 'center'}}>
-              <div style={{fontSize: '0.9rem', color: 'var(--text-muted)'}}>Encuentros Disputados</div>
-              <div style={{fontSize: '2rem', color: 'var(--primary-color)', fontWeight: 800}}>{rankingInfo.playedMatches} / {rankingInfo.totalGroupMatches}</div>
+          <div className="stats-dashboard glass-panel-heavy" style={{ marginBottom: '2rem', padding: '1.5rem', display: 'flex', justifyContent: 'space-around', flexWrap: 'wrap', gap: '1rem' }}>
+            <div className="stat-item" style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>Encuentros Disputados</div>
+              <div style={{ fontSize: '2rem', color: 'var(--primary-color)', fontWeight: 800 }}>{rankingInfo.playedMatches} / {rankingInfo.totalGroupMatches}</div>
             </div>
-            <div className="stat-item" style={{textAlign: 'center'}}>
-              <div style={{fontSize: '0.9rem', color: 'var(--text-muted)'}}>Encuentros Restantes</div>
-              <div style={{fontSize: '2rem', color: 'var(--text-main)', fontWeight: 800}}>{rankingInfo.remainingMatches}</div>
+            <div className="stat-item" style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>Encuentros Restantes</div>
+              <div style={{ fontSize: '2rem', color: 'var(--text-main)', fontWeight: 800 }}>{rankingInfo.remainingMatches}</div>
             </div>
-            <div className="stat-item" style={{textAlign: 'center'}}>
-              <div style={{fontSize: '0.9rem', color: 'var(--text-muted)'}}>Puntos Disputados</div>
-              <div style={{fontSize: '2rem', color: '#ff4b2b', fontWeight: 800}}>{rankingInfo.maxPossiblePoints} pts</div>
+            <div className="stat-item" style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>Puntos Disputados</div>
+              <div style={{ fontSize: '2rem', color: '#ff4b2b', fontWeight: 800 }}>{rankingInfo.maxPossiblePoints} pts</div>
             </div>
           </div>
 
           <div className="ranking-container glass-panel" style={{ overflowX: 'auto', padding: '0' }}>
             {rankingInfo.scores.length === 0 ? (
-              <p style={{textAlign: 'center', padding: '2rem'}}>Aún no hay quinielas registradas.</p>
+              <p style={{ textAlign: 'center', padding: '2rem' }}>Aún no hay quinielas registradas.</p>
             ) : (
               <table className="consolidated-table">
                 <thead>
@@ -990,7 +993,7 @@ function App() {
                     const distinctPoints = [...new Set(rankingInfo.scores.map(s => s.points))]
                     const place = distinctPoints.indexOf(user.points) + 1
                     const rankClass = place === 1 ? 'rank-1st' : place === 2 ? 'rank-2nd' : place === 3 ? 'rank-3rd' : ''
-                    
+
                     return (
                       <tr key={user.id} className={rankClass}>
                         <td className="sticky-col first-col">{place}</td>
@@ -1010,12 +1013,12 @@ function App() {
                             else ptsClass = 'pts-0'
                           }
                           const scoreText = pred ? `${pred.team1}-${pred.team2}` : '-'
-                          
+
                           return (
                             <td key={m.id} className={ptsClass}>
-                              <div style={{fontSize: '0.8rem'}}>{scoreText}</div>
-                              {pts > 0 && <div style={{fontSize: '0.7rem', fontWeight: 800}}>({pts})</div>}
-                              {isFinished && pts === 0 && <div style={{fontSize: '0.7rem', fontWeight: 800}}>(0)</div>}
+                              <div style={{ fontSize: '0.8rem' }}>{scoreText}</div>
+                              {pts > 0 && <div style={{ fontSize: '0.7rem', fontWeight: 800 }}>({pts})</div>}
+                              {isFinished && pts === 0 && <div style={{ fontSize: '0.7rem', fontWeight: 800 }}>(0)</div>}
                             </td>
                           )
                         })}
@@ -1035,7 +1038,7 @@ function App() {
           <div className="modal-content glass-panel" onClick={e => e.stopPropagation()}>
             <button className="close-modal" onClick={() => setShowRulesModal(false)}>&times;</button>
             <h2 className="text-gradient">Reglamento Mundial de Fútbol 2026</h2>
-            
+
             <div className="rules-section">
               <h3>⚽ Sistema de Puntuación (Fase de Grupos)</h3>
               <div className="rules-grid">
@@ -1063,7 +1066,7 @@ function App() {
               </ul>
             </div>
 
-            <button className="btn-primary" onClick={() => setShowRulesModal(false)} style={{width: '100%', marginTop: '1rem'}}>Entendido</button>
+            <button className="btn-primary" onClick={() => setShowRulesModal(false)} style={{ width: '100%', marginTop: '1rem' }}>Entendido</button>
           </div>
         </div>
       )}
@@ -1074,7 +1077,7 @@ function App() {
           <div className="modal-content glass-panel" onClick={e => e.stopPropagation()}>
             <button className="close-modal" onClick={() => setShowManualModal(false)}>&times;</button>
             <h2 className="text-gradient">Guía de Llenado Correcto</h2>
-            
+
             <div className="rules-section">
               <div className="manual-step">
                 <div className="step-num">1</div>
@@ -1085,7 +1088,7 @@ function App() {
               <div className="manual-step">
                 <div className="step-num">2</div>
                 <div className="step-text">
-                  <strong>Pronósticos:</strong> Coloca los goles en los cuadros blancos. Los bordes de la tarjeta se pondrán <span style={{color: '#2ecc71', fontWeight: 'bold'}}>Verdes</span> cuando hayas completado ambos campos de un partido.
+                  <strong>Pronósticos:</strong> Coloca los goles en los cuadros blancos. Los bordes de la tarjeta se pondrán <span style={{ color: '#2ecc71', fontWeight: 'bold' }}>Verdes</span> cuando hayas completado ambos campos de un partido.
                 </div>
               </div>
               <div className="manual-step">
@@ -1097,7 +1100,7 @@ function App() {
               <div className="manual-step">
                 <div className="step-num">4</div>
                 <div className="step-text">
-                  <strong>Guardar:</strong> Al finalizar los 72 partidos de la Fase de Grupos, haz clic en el botón <span style={{color: 'var(--primary-color)', fontWeight: 'bold'}}>"Guardar mi Quiniela"</span>.
+                  <strong>Guardar:</strong> Al finalizar los 72 partidos de la Fase de Grupos, haz clic en el botón <span style={{ color: 'var(--primary-color)', fontWeight: 'bold' }}>"Guardar mi Quiniela"</span>.
                 </div>
               </div>
               <div className="manual-step">
@@ -1108,7 +1111,7 @@ function App() {
               </div>
             </div>
 
-            <button className="btn-primary" onClick={() => setShowManualModal(false)} style={{width: '100%', marginTop: '1rem'}}>¡Listo, a jugar!</button>
+            <button className="btn-primary" onClick={() => setShowManualModal(false)} style={{ width: '100%', marginTop: '1rem' }}>¡Listo, a jugar!</button>
           </div>
         </div>
       )}
