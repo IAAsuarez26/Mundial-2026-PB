@@ -630,9 +630,30 @@
 }
 
 .step-text {
-  color: var(--text-muted);
+  color: var(--text-main);
   line-height: 1.5;
   font-size: 0.95rem;
+}
+
+.btn-primary {
+  padding: 0.8rem 2rem;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #fff;
+  background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+  border-radius: 30px;
+  box-shadow: 0 4px 15px rgba(0, 242, 254, 0.4);
+  transition: all 0.3s ease;
+  text-align: center;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 242, 254, 0.6);
+}
+
+.btn-primary:active {
+  transform: translateY(1px);
 }
 
 /* Responsive Design for Android & iOS */
