@@ -1076,10 +1076,10 @@ function App() {
         <div className="modal-overlay" onClick={() => setShowManualModal(false)}>
           <div className="modal-content glass-panel" onClick={e => e.stopPropagation()}>
             <button className="close-modal" onClick={() => setShowManualModal(false)}>&times;</button>
-            <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.2rem' }}>Mundial de Fútbol 2026 P&B</div>
-            <h2 className="text-gradient" style={{ marginTop: 0 }}>Guía de Llenado Correcto</h2>
+            <h2 className="text-gradient">Manual Mundial de Fútbol 2026 P&B</h2>
 
             <div className="rules-section">
+              <h3>📖 Guía de Llenado Correcto</h3>
               <div className="manual-step">
                 <div className="step-num">1</div>
                 <div className="step-text">
