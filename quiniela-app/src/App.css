@@ -601,6 +601,8 @@
   }
 }
 
+
+
 /* Manual Modal Styles */
 .manual-step {
   display: flex;
@@ -608,9 +610,9 @@
   align-items: flex-start;
   margin-bottom: 1.5rem;
   padding: 1rem;
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(255, 255, 255, 0.05);
   border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .step-num {
@@ -628,7 +630,7 @@
 }
 
 .step-text {
-  color: var(--text-main);
+  color: var(--text-muted);
   line-height: 1.5;
   font-size: 0.95rem;
 }
