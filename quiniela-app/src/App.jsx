@@ -308,8 +308,8 @@ function App() {
       }).join('')
 
       standingsHTML +=
-        `<p style="font-weight:700;color:#003366;font-size:13px;margin:14px 0 3px">GRUPO ${groupName}</p>` +
-        `<table width="100%" cellpadding="4" cellspacing="0" border="1" bordercolor="#dddddd" style="border-collapse:collapse;font-size:11px;margin-bottom:14px">` +
+        `<p style="font-weight:700;color:#003366;font-size:16px;margin:14px 0 3px">GRUPO ${groupName}</p>` +
+        `<table width="100%" cellpadding="5" cellspacing="0" border="1" bordercolor="#dddddd" style="border-collapse:collapse;font-size:13px;margin-bottom:14px">` +
         `<tr align="center" bgcolor="#003366" style="color:#fff">` +
         `<th colspan="2" align="left">Equipo</th>` +
         `<th>PJ</th><th>PG</th><th>PE</th><th>PP</th><th>GF</th><th>GC</th><th>DG</th><th>PTS</th>` +
@@ -322,7 +322,7 @@ function App() {
       .filter(m => m.id <= 72 && predictions[m.id])
       .map(m => {
         const p = predictions[m.id]
-        return `<tr><td style="padding:4px 6px;border-bottom:1px solid #eee;font-size:11px">` +
+        return `<tr><td style="padding:6px 8px;border-bottom:1px solid #eee;font-size:14px">` +
           `<b>${m.id}.</b> ${getTeamName(m.team1_id)} <b>${p.team1} – ${p.team2}</b> ${getTeamName(m.team2_id)}` +
           `</td></tr>`
       }).join('')
@@ -332,21 +332,21 @@ function App() {
     // 3. Final email wrapper
     const emailHTML =
       `<div style="background:#f0f2f5;padding:16px;font-family:Arial,sans-serif">` +
-      `<table width="100%" style="max-width:600px;margin:0 auto;background:#003366;border-radius:8px 8px 0 0">` +
+      `<table width="100%" style="max-width:650px;margin:0 auto;background:#003366;border-radius:8px 8px 0 0">` +
       `<tr><td style="padding:18px;text-align:center">` +
-      `<h1 style="color:#fff;margin:0;font-size:20px">Posiciones según tus Pronósticos</h1>` +
-      `<p style="color:#aad4f5;margin:6px 0 0;font-size:13px">Quiniela Mundial 2026 · ${userName}</p>` +
+      `<h1 style="color:#fff;margin:0;font-size:24px">Posiciones según tus Pronósticos</h1>` +
+      `<p style="color:#aad4f5;margin:6px 0 0;font-size:15px">Quiniela Ponce & Benzo Mundial Norteamérica 2026 · ${userName}</p>` +
       `</td></tr>` +
       `</table>` +
-      `<table width="100%" style="max-width:600px;margin:0 auto;background:#fff;border-radius:0 0 8px 8px">` +
-      `<tr><td style="padding:20px">` +
-      `<h2 style="color:#003366;border-bottom:2px solid #eee;padding-bottom:8px;font-size:15px;margin-top:0">Posiciones Proyectadas</h2>` +
+      `<table width="100%" style="max-width:650px;margin:0 auto;background:#fff;border-radius:0 0 8px 8px">` +
+      `<tr><td style="padding:24px">` +
+      `<h2 style="color:#003366;border-bottom:2px solid #eee;padding-bottom:8px;font-size:18px;margin-top:0">Posiciones Proyectadas</h2>` +
       standingsHTML +
-      `<h2 style="color:#003366;border-bottom:2px solid #eee;padding-bottom:8px;font-size:15px;margin-top:20px">Tus Pronósticos</h2>` +
+      `<h2 style="color:#003366;border-bottom:2px solid #eee;padding-bottom:8px;font-size:18px;margin-top:24px">Tus Pronósticos</h2>` +
       matchesHTML +
       `</td></tr>` +
       `</table>` +
-      `<p style="text-align:center;font-size:11px;color:#999;margin-top:10px">Enviado automáticamente · Quiniela Mundial 2026</p>` +
+      `<p style="text-align:center;font-size:12px;color:#999;margin-top:12px">Enviado automáticamente · Quiniela Ponce & Benzo Mundial Norteamérica 2026</p>` +
       `</div>`
 
     const templateParams = {
