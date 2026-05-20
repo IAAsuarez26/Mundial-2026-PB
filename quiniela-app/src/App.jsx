@@ -23,6 +23,9 @@ function App() {
   const [expandedJornadas, setExpandedJornadas] = useState({})
   const [showGroups, setShowGroups] = useState(false)
   const [hasAutoOpenedGroups, setHasAutoOpenedGroups] = useState(false)
+  const [hasAutoOpenedJornada1, setHasAutoOpenedJornada1] = useState(false)
+  const [hasAutoOpenedJornada2, setHasAutoOpenedJornada2] = useState(false)
+  const [hasAutoOpenedJornada3, setHasAutoOpenedJornada3] = useState(false)
 
   // Dynamic Data State
   const [teams, setTeams] = useState([])
@@ -36,6 +39,9 @@ function App() {
   const [showRulesModal, setShowRulesModal] = useState(false)
   const [showManualModal, setShowManualModal] = useState(false)
   const [showSuccessModal, setShowSuccessModal] = useState(false)
+  // New state to track email validation and Tab press
+  const [emailReady, setEmailReady] = useState(false)
+  const [emailConfirmed, setEmailConfirmed] = useState(false)
 
   const toggleJornada = (jornadaName) => {
     setExpandedJornadas(prev => ({ ...prev, [jornadaName]: !prev[jornadaName] }))
@@ -121,9 +127,80 @@ function App() {
         if (groupsSection) {
           groupsSection.scrollIntoView({ behavior: 'smooth' });
         }
+        const saveBtn = document.getElementById('save-quiniela-btn');
+        if (saveBtn) {
+          saveBtn.focus();
+        }
       }, 100);
     }
   }, [predictions, matches, hasAutoOpenedGroups]);
+
+  // Auto-expand Jornada 1 when user info is filled and email validated
+  useEffect(() => {
+    if (hasAutoOpenedJornada1) return;
+
+    if (userName.trim() !== '' && userCedula.trim() !== '' && emailConfirmed) {
+      setExpandedJornadas(prev => ({ ...prev, 'Jornada 1': true }));
+      setHasAutoOpenedJornada1(true);
+      setTimeout(() => {
+        const firstInput = document.getElementById('input-match-1-team1');
+        if (firstInput) {
+          firstInput.focus();
+          firstInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 100);
+    }
+  }, [userName, userCedula, emailConfirmed, hasAutoOpenedJornada1]);
+
+  // Auto-expand Jornada 2
+  useEffect(() => {
+    if (matches.length === 0 || hasAutoOpenedJornada2) return;
+    const j1Matches = matches.filter(m => m.id >= 1 && m.id <= 24);
+    if (j1Matches.length === 0) return;
+    
+    const allFilled = j1Matches.every(m => {
+      const pred = predictions[m.id];
+      return pred && pred.team1 !== null && pred.team1 !== undefined && pred.team1 !== '' &&
+             pred.team2 !== null && pred.team2 !== undefined && pred.team2 !== '';
+    });
+    
+    if (allFilled) {
+      setExpandedJornadas(prev => ({ ...prev, 'Jornada 2': true }));
+      setHasAutoOpenedJornada2(true);
+      setTimeout(() => {
+        const firstInput = document.getElementById('input-match-25-team1');
+        if (firstInput) {
+          firstInput.focus();
+          firstInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 100);
+    }
+  }, [predictions, matches, hasAutoOpenedJornada2]);
+
+  // Auto-expand Jornada 3
+  useEffect(() => {
+    if (matches.length === 0 || hasAutoOpenedJornada3) return;
+    const j2Matches = matches.filter(m => m.id >= 25 && m.id <= 48);
+    if (j2Matches.length === 0) return;
+    
+    const allFilled = j2Matches.every(m => {
+      const pred = predictions[m.id];
+      return pred && pred.team1 !== null && pred.team1 !== undefined && pred.team1 !== '' &&
+             pred.team2 !== null && pred.team2 !== undefined && pred.team2 !== '';
+    });
+    
+    if (allFilled) {
+      setExpandedJornadas(prev => ({ ...prev, 'Jornada 3': true }));
+      setHasAutoOpenedJornada3(true);
+      setTimeout(() => {
+        const firstInput = document.getElementById('input-match-49-team1');
+        if (firstInput) {
+          firstInput.focus();
+          firstInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 100);
+    }
+  }, [predictions, matches, hasAutoOpenedJornada3]);
 
   // Handle score change for user predictions
   const handleScoreChange = (matchId, team, score) => {
@@ -612,7 +689,19 @@ function App() {
                 className="user-name-input glass-panel"
                 placeholder="Correo Electrónico"
                 value={userEmail}
-                onChange={(e) => setUserEmail(e.target.value)}
+                onChange={(e) => {
+                  setUserEmail(e.target.value);
+                  // Reset confirmation if email changes
+                  setEmailConfirmed(false);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Tab') {
+                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                    if (emailRegex.test(userEmail.trim())) {
+                      setEmailConfirmed(true);
+                    }
+                  }
+                }}
               />
             </div>
           </div>
@@ -654,6 +743,7 @@ function App() {
                               <div className="team">{getTeamName(match.team1_id)}</div>
                               <input
                                 type="number" min="0" className="team-input"
+                                id={`input-match-${match.id}-team1`}
                                 value={predictions[match.id]?.team1 ?? ''}
                                 onChange={(e) => handleScoreChange(match.id, 'team1', e.target.value)}
                                 onKeyDown={(e) => ['e', 'E', '+', '-', '.', ','].includes(e.key) && e.preventDefault()}
@@ -663,6 +753,7 @@ function App() {
                               <span className="vs-badge">VS</span>
                               <input
                                 type="number" min="0" className="team-input"
+                                id={`input-match-${match.id}-team2`}
                                 value={predictions[match.id]?.team2 ?? ''}
                                 onChange={(e) => handleScoreChange(match.id, 'team2', e.target.value)}
                                 onKeyDown={(e) => ['e', 'E', '+', '-', '.', ','].includes(e.key) && e.preventDefault()}
@@ -736,7 +827,7 @@ function App() {
           </section>
 
           <div style={{ display: 'flex', justifyContent: 'center', marginTop: '3rem', marginBottom: '3rem' }}>
-            <button className="save-btn" onClick={savePredictions} disabled={isSaving} style={{ padding: '1.2rem 3rem', fontSize: '1.2rem' }}>
+            <button id="save-quiniela-btn" className="save-btn" onClick={savePredictions} disabled={isSaving} style={{ padding: '1.2rem 3rem', fontSize: '1.2rem' }}>
               {isSaving ? 'Guardando...' : '¡Guardar mi Quiniela!'}
             </button>
           </div>
