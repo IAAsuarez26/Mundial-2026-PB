@@ -638,7 +638,11 @@ function App() {
       // ── Structural rows ──────────────────────────────────────
       headerBg:   'FF0D1B2E',   // dark navy  → text cyan
       headerText: 'FF00D4E8',
-      realBg:     'FF007B8A',   // teal medium → text white
+      realIdBg:   'FF00838F',   // teal sólido → Pos + Participante + Score
+      realDataBg: 'FFE0F7FA',   // azul muy claro → celdas de partidos
+      realIdText: 'FFFFFFFF',   // blanco
+      realDataText:'FF005B64',  // teal oscuro
+      realNpText: 'FF78909C',   // gris azulado → 'NP'
       // ── Podium rows (text dark for contrast on light bg) ───
       rank1Bg:    'FFFFF9E0',   // light gold/cream
       rank2Bg:    'FFF0F0F0',   // light silver/gray
@@ -693,16 +697,24 @@ function App() {
 
     const realRow = worksheet.addRow(realResultsData)
     realRow.eachCell((cell, colNumber) => {
-      cell.fill = solidFill(COLORS.realBg)
-      cell.font = { color: { argb: colNumber <= 2 ? COLORS.cyan : COLORS.white }, bold: true }
+      if (colNumber <= 5) {
+        // Cols Pos, Participante, Total/Score, Ex, Pa → teal sólido, texto blanco
+        cell.fill = solidFill(COLORS.realIdBg)
+        cell.font = { color: { argb: COLORS.realIdText }, bold: true }
+      } else {
+        // Celdas de partidos → azul muy claro, texto oscuro
+        cell.fill = solidFill(COLORS.realDataBg)
+        cell.font = { color: { argb: COLORS.realDataText }, bold: true }
+      }
       cell.alignment = { horizontal: 'center', vertical: 'middle' }
       if (colNumber === 2) cell.alignment = { horizontal: 'left', vertical: 'middle', indent: 1 }
       if (colNumber === 3) {
         worksheet.mergeCells('C2:E2')
         cell.alignment = { horizontal: 'center', vertical: 'middle' }
       }
+      // NP: gris azulado, sin negrita
       if (colNumber > 5 && cell.value === 'NP') {
-        cell.font = { color: { argb: 'FF888888' }, bold: false }
+        cell.font = { color: { argb: COLORS.realNpText }, bold: false }
       }
     })
 
