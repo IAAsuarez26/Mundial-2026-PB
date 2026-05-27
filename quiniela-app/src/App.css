@@ -770,4 +770,20 @@
   animation: fadeIn 0.3s ease-in-out;
 }
 
+/* Header Toggle Animations */
+.jornada-header-toggle {
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, opacity 0.3s ease;
+}
+
+.jornada-header-toggle:not(.section-locked):hover {
+  transform: translateY(-2px);
+  border-color: var(--primary-color) !important;
+  box-shadow: 0 5px 15px rgba(0, 242, 254, 0.15);
+}
+
+.jornada-header-toggle:not(.section-locked):active {
+  transform: translateY(0);
+}
+
+
 

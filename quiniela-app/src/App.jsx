@@ -51,7 +51,25 @@ function App() {
     return !emailRegex.test(userEmail.trim())
   }, [userEmail])
 
+  // Check if Cédula, Nombre and email validation are complete
+  const isUserInfoComplete = useMemo(() => {
+    return userName.trim() !== '' && userCedula.trim() !== '' && emailConfirmed
+  }, [userName, userCedula, emailConfirmed])
+
+  // Collapse and lock sections if user info is incomplete
+  useEffect(() => {
+    if (!isUserInfoComplete) {
+      setExpandedJornadas({})
+      setShowGroups(false)
+      setHasAutoOpenedJornada1(false)
+      setHasAutoOpenedJornada2(false)
+      setHasAutoOpenedJornada3(false)
+      setHasAutoOpenedGroups(false)
+    }
+  }, [isUserInfoComplete])
+
   const toggleJornada = (jornadaName) => {
+    if (!isUserInfoComplete) return
     setExpandedJornadas(prev => ({ ...prev, [jornadaName]: !prev[jornadaName] }))
   }
 
@@ -917,9 +935,22 @@ function App() {
             )}
           </div>
 
+          {!isUserInfoComplete && (
+            <div className="glass-panel" style={{
+              textAlign: 'center',
+              padding: '1.5rem',
+              margin: '2rem 0',
+              border: '1px dashed var(--glass-border)',
+              borderRadius: '12px',
+              animation: 'fadeIn 0.5s ease-in-out'
+            }}>
+              <span style={{ color: 'var(--text-muted)', fontSize: '1.1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                🔒 Ingresa tu Cédula, Nombre y Correo electrónico válido para desbloquear las predicciones y posiciones de grupos.
+              </span>
+            </div>
+          )}
 
-
-          <section className="matches-section">
+          <section className="matches-section" style={{ opacity: isUserInfoComplete ? 1 : 0.65, transition: 'opacity 0.3s ease' }}>
             <h2 className="matches-header text-gradient" style={{ marginBottom: '2rem' }}>Fase de Grupos</h2>
             {[
               { name: 'Jornada 1', range: [1, 24] },
@@ -930,12 +961,24 @@ function App() {
               return (
                 <div key={jornada.name} className="jornada-section" style={{ marginBottom: '3rem' }}>
                   <div
-                    className="jornada-header-toggle glass-panel"
-                    onClick={() => toggleJornada(jornada.name)}
-                    style={{ cursor: 'pointer', padding: '1rem', marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                    className={`jornada-header-toggle glass-panel ${!isUserInfoComplete ? 'section-locked' : ''}`}
+                    onClick={() => {
+                      if (!isUserInfoComplete) return
+                      toggleJornada(jornada.name)
+                    }}
+                    style={{
+                      cursor: isUserInfoComplete ? 'pointer' : 'not-allowed',
+                      padding: '1rem',
+                      marginBottom: '1.5rem',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      opacity: isUserInfoComplete ? 1 : 0.5,
+                      transition: 'all 0.3s ease'
+                    }}
                   >
                     <h3 className="text-gradient" style={{ margin: 0, fontSize: '1.5rem' }}>{jornada.name}</h3>
-                    <span style={{ fontSize: '1.5rem' }}>{expandedJornadas[jornada.name] ? '▲' : '▼'}</span>
+                    <span style={{ fontSize: '1.5rem' }}>{!isUserInfoComplete ? '🔒' : (expandedJornadas[jornada.name] ? '▲' : '▼')}</span>
                   </div>
                   {expandedJornadas[jornada.name] && (
                     <div className="matches-grid">
@@ -983,16 +1026,26 @@ function App() {
             })}
           </section>
 
-
-
-          <section id="groups-section-id" className="groups-section" style={{ marginTop: '3rem' }}>
+          <section id="groups-section-id" className="groups-section" style={{ marginTop: '3rem', opacity: isUserInfoComplete ? 1 : 0.65, transition: 'opacity 0.3s ease' }}>
             <div
-              className="jornada-header-toggle glass-panel"
-              onClick={() => setShowGroups(prev => !prev)}
-              style={{ cursor: 'pointer', padding: '1rem', marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+              className={`jornada-header-toggle glass-panel ${!isUserInfoComplete ? 'section-locked' : ''}`}
+              onClick={() => {
+                if (!isUserInfoComplete) return
+                setShowGroups(prev => !prev)
+              }}
+              style={{
+                cursor: isUserInfoComplete ? 'pointer' : 'not-allowed',
+                padding: '1rem',
+                marginBottom: '1.5rem',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                opacity: isUserInfoComplete ? 1 : 0.5,
+                transition: 'all 0.3s ease'
+              }}
             >
               <h3 className="text-gradient" style={{ margin: 0, fontSize: '1.5rem' }}>Posiciones por grupo</h3>
-              <span style={{ fontSize: '1.5rem' }}>{showGroups ? '▲' : '▼'}</span>
+              <span style={{ fontSize: '1.5rem' }}>{!isUserInfoComplete ? '🔒' : (showGroups ? '▲' : '▼')}</span>
             </div>
             {showGroups && (
               <div className="groups-grid">
@@ -1037,11 +1090,13 @@ function App() {
             )}
           </section>
 
-          <div style={{ display: 'flex', justifyContent: 'center', marginTop: '3rem', marginBottom: '3rem' }}>
-            <button id="save-quiniela-btn" className="save-btn" onClick={savePredictions} disabled={isSaving} style={{ padding: '1.2rem 3rem', fontSize: '1.2rem' }}>
-              {isSaving ? 'Guardando...' : '¡Guardar mi Quiniela!'}
-            </button>
-          </div>
+          {isUserInfoComplete && (
+            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '3rem', marginBottom: '3rem' }}>
+              <button id="save-quiniela-btn" className="save-btn" onClick={savePredictions} disabled={isSaving} style={{ padding: '1.2rem 3rem', fontSize: '1.2rem' }}>
+                {isSaving ? 'Guardando...' : '¡Guardar mi Quiniela!'}
+              </button>
+            </div>
+          )}
 
           {showSuccessModal && (
             <div className="modal-overlay">
