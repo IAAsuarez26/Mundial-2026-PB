@@ -634,17 +634,42 @@ function App() {
 
     worksheet.columns = columns
 
-    // Header styling
+    const COLORS = {
+      headerBg:   'FF0A0F1E',
+      headerText: 'FF00F2FE',
+      realBg:     'FF006368',
+      rank1Bg:    'FF152B1A',
+      rank2Bg:    'FF242009',
+      rank3Bg:    'FF26100F',
+      defaultBg:  'FF0E1525',
+      gold:       'FFFFD700',
+      silver:     'FFC0C0C0',
+      bronze:     'FFCD7F32',
+      cyan:       'FF00F2FE',
+      white:      'FFFFFFFF',
+      pts5Bg:     'FF1A4D2A',
+      pts5Text:   'FF2ECC71',
+      pts3Bg:     'FF0D2615',
+      pts3Text:   'FF2ECC71',
+      pts1Bg:     'FF262300',
+      pts1Text:   'FFFFCC00',
+      pts0Bg:     'FF2B110E',
+      pts0Text:   'FFFF4B2B',
+    }
+
+    const solidFill = (argb) => ({ type: 'pattern', pattern: 'solid', fgColor: { argb } })
+
+    // Header row
     const headerRow = worksheet.getRow(1)
     headerRow.eachCell((cell) => {
-      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { arg: 'FF0A0F1E' } }
-      cell.font = { color: { arg: 'FF00F2FE' }, bold: true }
+      cell.fill = solidFill(COLORS.headerBg)
+      cell.font = { color: { argb: COLORS.headerText }, bold: true }
       cell.alignment = { horizontal: 'center', vertical: 'middle' }
       cell.border = {
-        top: { style: 'thin', color: { arg: 'FF00F2FE' } },
-        left: { style: 'thin', color: { arg: 'FF00F2FE' } },
-        bottom: { style: 'thin', color: { arg: 'FF00F2FE' } },
-        right: { style: 'thin', color: { arg: 'FF00F2FE' } }
+        top:    { style: 'thin', color: { argb: COLORS.headerText } },
+        left:   { style: 'thin', color: { argb: COLORS.headerText } },
+        bottom: { style: 'thin', color: { argb: COLORS.headerText } },
+        right:  { style: 'thin', color: { argb: COLORS.headerText } }
       }
     })
 
@@ -657,19 +682,22 @@ function App() {
       partial: ''
     }
     rankingInfo.groupMatches.forEach(m => {
-      const isFinished = m.score_team1 !== null && m.score_team2 !== null;
+      const isFinished = m.score_team1 !== null && m.score_team2 !== null
       realResultsData[`m${m.id}`] = isFinished ? `${m.score_team1}-${m.score_team2}` : 'NP'
     })
-    
+
     const realRow = worksheet.addRow(realResultsData)
     realRow.eachCell((cell, colNumber) => {
-      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { arg: 'FF0096A0' } }
-      cell.font = { color: { arg: colNumber <= 2 ? 'FF00F2FE' : 'FFFFFFFF' }, bold: true }
+      cell.fill = solidFill(COLORS.realBg)
+      cell.font = { color: { argb: colNumber <= 2 ? COLORS.cyan : COLORS.white }, bold: true }
       cell.alignment = { horizontal: 'center', vertical: 'middle' }
-      if (colNumber === 2) cell.alignment = { horizontal: 'left', vertical: 'middle' }
+      if (colNumber === 2) cell.alignment = { horizontal: 'left', vertical: 'middle', indent: 1 }
       if (colNumber === 3) {
         worksheet.mergeCells('C2:E2')
         cell.alignment = { horizontal: 'center', vertical: 'middle' }
+      }
+      if (colNumber > 5 && cell.value === 'NP') {
+        cell.font = { color: { argb: 'FF888888' }, bold: false }
       }
     })
 
@@ -690,68 +718,67 @@ function App() {
         const pred = user.predictions[m.id]
         const pts = user.matchPoints[m.id] || 0
         const isFinished = m.score_team1 !== null && m.score_team2 !== null
-        
-        // Add score and points to excel cell
         const scoreText = pred ? `${pred.team1}-${pred.team2}` : '-'
-        if (isFinished) {
-          rowData[`m${m.id}`] = `${scoreText}\n(${pts})`
-        } else {
-          rowData[`m${m.id}`] = scoreText
-        }
+        rowData[`m${m.id}`] = isFinished ? `${scoreText}\n(${pts})` : scoreText
       })
 
       const row = worksheet.addRow(rowData)
-      
+
+      const rowBg =
+        place === 1 ? COLORS.rank1Bg :
+        place === 2 ? COLORS.rank2Bg :
+        place === 3 ? COLORS.rank3Bg :
+        COLORS.defaultBg
+
+      for (let c = 1; c <= worksheet.columnCount; c++) {
+        row.getCell(c).fill = solidFill(rowBg)
+      }
+
       row.getCell(1).alignment = { horizontal: 'center', vertical: 'middle' }
-      row.getCell(2).alignment = { horizontal: 'left', vertical: 'middle' }
-      row.getCell(3).font = { bold: true, color: { arg: 'FF00F2FE' } }
+      row.getCell(2).alignment = { horizontal: 'left', vertical: 'middle', indent: 1 }
       row.getCell(3).alignment = { horizontal: 'center', vertical: 'middle' }
       row.getCell(4).alignment = { horizontal: 'center', vertical: 'middle' }
       row.getCell(5).alignment = { horizontal: 'center', vertical: 'middle' }
 
-      // Rank colors and background
+      row.getCell(3).font = { bold: true, color: { argb: COLORS.cyan } }
+
       if (place === 1) {
-        row.getCell(1).font = { color: { arg: 'FFD4AF37' }, bold: true } // Gold
-        row.getCell(2).font = { color: { arg: 'FFD4AF37' }, bold: true }
-        row.eachCell((cell) => {
-          if (!cell.fill) cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { arg: 'FFE8F5E9' } } // Light green bg
-        })
-      }
-      if (place === 2) {
-        row.getCell(1).font = { color: { arg: 'FF9E9E9E' }, bold: true } // Silver
-        row.getCell(2).font = { color: { arg: 'FF9E9E9E' }, bold: true }
-        row.eachCell((cell) => {
-          if (!cell.fill) cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { arg: 'FFFFFDE7' } } // Light yellow bg
-        })
-      }
-      if (place === 3) {
-        row.getCell(1).font = { color: { arg: 'FFCD7F32' }, bold: true } // Bronze
-        row.getCell(2).font = { color: { arg: 'FFCD7F32' }, bold: true }
-        row.eachCell((cell) => {
-          if (!cell.fill) cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { arg: 'FFFFEBEE' } } // Light red bg
-        })
+        row.getCell(1).font = { color: { argb: COLORS.gold },   bold: true, size: 12 }
+        row.getCell(2).font = { color: { argb: COLORS.gold },   bold: true }
+        row.getCell(3).font = { color: { argb: COLORS.cyan },   bold: true }
+      } else if (place === 2) {
+        row.getCell(1).font = { color: { argb: COLORS.silver }, bold: true, size: 12 }
+        row.getCell(2).font = { color: { argb: COLORS.silver }, bold: true }
+        row.getCell(3).font = { color: { argb: COLORS.cyan },   bold: true }
+      } else if (place === 3) {
+        row.getCell(1).font = { color: { argb: COLORS.bronze }, bold: true, size: 12 }
+        row.getCell(2).font = { color: { argb: COLORS.bronze }, bold: true }
+        row.getCell(3).font = { color: { argb: COLORS.cyan },   bold: true }
+      } else {
+        row.getCell(1).font = { color: { argb: COLORS.cyan }, bold: false }
+        row.getCell(2).font = { color: { argb: COLORS.white } }
       }
 
       rankingInfo.groupMatches.forEach((m, mIdx) => {
         const colNum = 6 + mIdx
         const cell = row.getCell(colNum)
         cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true }
-        
+
         const isFinished = m.score_team1 !== null && m.score_team2 !== null
         if (isFinished) {
           const pts = user.matchPoints[m.id] || 0
           if (pts === 5) {
-            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { arg: 'FFC8E6C9' } } // Lighter green
-            cell.font = { color: { arg: 'FF1B5E20' }, bold: true }
+            cell.fill = solidFill(COLORS.pts5Bg)
+            cell.font = { color: { argb: COLORS.pts5Text }, bold: true }
           } else if (pts === 3) {
-            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { arg: 'FFE8F5E9' } } // Paler green
-            cell.font = { color: { arg: 'FF2E7D32' } }
+            cell.fill = solidFill(COLORS.pts3Bg)
+            cell.font = { color: { argb: COLORS.pts3Text } }
           } else if (pts === 1) {
-            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { arg: 'FFFFF9C4' } } // Light yellow
-            cell.font = { color: { arg: 'FFF57F17' } }
+            cell.fill = solidFill(COLORS.pts1Bg)
+            cell.font = { color: { argb: COLORS.pts1Text } }
           } else {
-            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { arg: 'FFFFCDD2' } } // Light red
-            cell.font = { color: { arg: 'FFC62828' } }
+            cell.fill = solidFill(COLORS.pts0Bg)
+            cell.font = { color: { argb: COLORS.pts0Text } }
           }
         }
       })
