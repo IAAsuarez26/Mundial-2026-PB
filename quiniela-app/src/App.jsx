@@ -709,13 +709,28 @@ function App() {
       row.getCell(4).alignment = { horizontal: 'center', vertical: 'middle' }
       row.getCell(5).alignment = { horizontal: 'center', vertical: 'middle' }
 
-      // Rank colors
-      if (place === 1) row.getCell(1).font = { color: { arg: 'FFD4AF37' }, bold: true } // Gold
-      if (place === 2) row.getCell(1).font = { color: { arg: 'FF9E9E9E' }, bold: true } // Silver
-      if (place === 3) row.getCell(1).font = { color: { arg: 'FFCD7F32' }, bold: true } // Bronze
-      if (place === 1) row.getCell(2).font = { color: { arg: 'FFD4AF37' }, bold: true }
-      if (place === 2) row.getCell(2).font = { color: { arg: 'FF9E9E9E' }, bold: true }
-      if (place === 3) row.getCell(2).font = { color: { arg: 'FFCD7F32' }, bold: true }
+      // Rank colors and background
+      if (place === 1) {
+        row.getCell(1).font = { color: { arg: 'FFD4AF37' }, bold: true } // Gold
+        row.getCell(2).font = { color: { arg: 'FFD4AF37' }, bold: true }
+        row.eachCell((cell) => {
+          if (!cell.fill) cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { arg: 'FFE8F5E9' } } // Light green bg
+        })
+      }
+      if (place === 2) {
+        row.getCell(1).font = { color: { arg: 'FF9E9E9E' }, bold: true } // Silver
+        row.getCell(2).font = { color: { arg: 'FF9E9E9E' }, bold: true }
+        row.eachCell((cell) => {
+          if (!cell.fill) cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { arg: 'FFFFFDE7' } } // Light yellow bg
+        })
+      }
+      if (place === 3) {
+        row.getCell(1).font = { color: { arg: 'FFCD7F32' }, bold: true } // Bronze
+        row.getCell(2).font = { color: { arg: 'FFCD7F32' }, bold: true }
+        row.eachCell((cell) => {
+          if (!cell.fill) cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { arg: 'FFFFEBEE' } } // Light red bg
+        })
+      }
 
       rankingInfo.groupMatches.forEach((m, mIdx) => {
         const colNum = 6 + mIdx
