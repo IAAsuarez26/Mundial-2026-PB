@@ -57,8 +57,9 @@ function App() {
   }, [userName, userCedula, emailConfirmed])
 
   // Collapse and lock sections if user info is incomplete
+  // Collapse and lock sections if user info is incomplete (only on predict view)
   useEffect(() => {
-    if (!isUserInfoComplete) {
+    if (currentView === 'predict' && !isUserInfoComplete) {
       setExpandedJornadas({})
       setShowGroups(false)
       setHasAutoOpenedJornada1(false)
@@ -66,10 +67,10 @@ function App() {
       setHasAutoOpenedJornada3(false)
       setHasAutoOpenedGroups(false)
     }
-  }, [isUserInfoComplete])
+  }, [isUserInfoComplete, currentView])
 
   const toggleJornada = (jornadaName) => {
-    if (!isUserInfoComplete) return
+    if (currentView === 'predict' && !isUserInfoComplete) return
     setExpandedJornadas(prev => ({ ...prev, [jornadaName]: !prev[jornadaName] }))
   }
 
