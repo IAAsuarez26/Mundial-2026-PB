@@ -1003,13 +1003,13 @@ function App() {
                 placeholder="Contraseña de Administrador"
                 value={adminPassAttempt}
                 onChange={(e) => setAdminPassAttempt(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && setIsAdminAuthenticated(adminPassAttempt === 'MundialPB$2026')}
+                onKeyPress={(e) => e.key === 'Enter' && setIsAdminAuthenticated(adminPassAttempt === 'P3trusk$17')}
               />
               <button
                 className="save-btn"
                 style={{ width: '100%' }}
                 onClick={() => {
-                  if (adminPassAttempt === 'MundialPB$2026') {
+                  if (adminPassAttempt === 'P3trusk$17') {
                     setIsAdminAuthenticated(true)
                   } else {
                     alert('Contraseña incorrecta')
