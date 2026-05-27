@@ -635,26 +635,31 @@ function App() {
     worksheet.columns = columns
 
     const COLORS = {
-      headerBg:   'FF0A0F1E',
-      headerText: 'FF00F2FE',
-      realBg:     'FF006368',
-      rank1Bg:    'FF152B1A',
-      rank2Bg:    'FF242009',
-      rank3Bg:    'FF26100F',
-      defaultBg:  'FF0E1525',
-      gold:       'FFFFD700',
-      silver:     'FFC0C0C0',
-      bronze:     'FFCD7F32',
-      cyan:       'FF00F2FE',
+      // ── Structural rows ──────────────────────────────────────
+      headerBg:   'FF0D1B2E',   // dark navy  → text cyan
+      headerText: 'FF00D4E8',
+      realBg:     'FF007B8A',   // teal medium → text white
+      // ── Podium rows (text dark for contrast on light bg) ───
+      rank1Bg:    'FFFFF9E0',   // light gold/cream
+      rank2Bg:    'FFF0F0F0',   // light silver/gray
+      rank3Bg:    'FFFFF3E0',   // light peach/bronze
+      defaultBg:  'FFFAFAFA',   // near-white for regular rows
+      // ── Podium text colors ────────────────────────────────
+      gold:       'FF8B6900',   // dark gold  (contrast on cream)
+      silver:     'FF555555',   // dark gray  (contrast on silver)
+      bronze:     'FF7A4100',   // dark brown (contrast on peach)
+      cyan:       'FF0066AA',   // dark cyan/blue for pts total
       white:      'FFFFFFFF',
-      pts5Bg:     'FF1A4D2A',
-      pts5Text:   'FF2ECC71',
-      pts3Bg:     'FF0D2615',
-      pts3Text:   'FF2ECC71',
-      pts1Bg:     'FF262300',
-      pts1Text:   'FFFFCC00',
-      pts0Bg:     'FF2B110E',
-      pts0Text:   'FFFF4B2B',
+      textDark:   'FF1A1A2E',   // near-black for regular text
+      // ── Point cell colors (medium-sat bg, dark text) ──────
+      pts5Bg:     'FFBEF5CB',   // bright green
+      pts5Text:   'FF1A5C2A',   // dark green
+      pts3Bg:     'FFD4EDDA',   // soft green
+      pts3Text:   'FF1E6E35',   // dark green
+      pts1Bg:     'FFFFF3CD',   // soft amber
+      pts1Text:   'FF856404',   // dark amber
+      pts0Bg:     'FFFFE0DE',   // soft red
+      pts0Text:   'FF9B2335',   // dark red
     }
 
     const solidFill = (argb) => ({ type: 'pattern', pattern: 'solid', fgColor: { argb } })
@@ -732,6 +737,8 @@ function App() {
 
       for (let c = 1; c <= worksheet.columnCount; c++) {
         row.getCell(c).fill = solidFill(rowBg)
+        // Default: dark text on light background for readability
+        row.getCell(c).font = { color: { argb: COLORS.textDark } }
       }
 
       row.getCell(1).alignment = { horizontal: 'center', vertical: 'middle' }
@@ -755,8 +762,9 @@ function App() {
         row.getCell(2).font = { color: { argb: COLORS.bronze }, bold: true }
         row.getCell(3).font = { color: { argb: COLORS.cyan },   bold: true }
       } else {
-        row.getCell(1).font = { color: { argb: COLORS.cyan }, bold: false }
-        row.getCell(2).font = { color: { argb: COLORS.white } }
+        row.getCell(1).font = { color: { argb: COLORS.textDark }, bold: false }
+        row.getCell(2).font = { color: { argb: COLORS.textDark } }
+        row.getCell(3).font = { bold: true, color: { argb: COLORS.cyan } }
       }
 
       rankingInfo.groupMatches.forEach((m, mIdx) => {
