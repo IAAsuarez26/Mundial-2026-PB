@@ -240,6 +240,108 @@ function App() {
     }))
   }
 
+  // Helper to focus the next input in the prediction sequence
+  const focusNextInput = (matchId, field) => {
+    if (field === 'team1') {
+      const nextInput = document.getElementById(`input-match-${matchId}-team2`)
+      if (nextInput) {
+        nextInput.focus()
+        nextInput.select()
+      }
+    } else {
+      let nextMatchId = matchId + 1
+      while (nextMatchId <= 72) {
+        const nextMatchObj = matches.find(m => m.id === nextMatchId)
+        if (nextMatchObj && !isMatchStarted(nextMatchObj.date)) {
+          break
+        }
+        nextMatchId++
+      }
+
+      if (nextMatchId <= 72) {
+        const nextInput = document.getElementById(`input-match-${nextMatchId}-team1`)
+        if (nextInput) {
+          nextInput.focus()
+          nextInput.select()
+          nextInput.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        }
+      }
+    }
+  }
+
+  // Handle predictions score change with 0-9 validation and auto-advance
+  const handlePredictionInputChange = (matchId, field, val) => {
+    if (val !== '') {
+      const num = parseInt(val)
+      if (isNaN(num) || num < 0 || num > 9) return
+    }
+
+    handleScoreChange(matchId, field, val)
+
+    if (val !== '') {
+      setTimeout(() => {
+        focusNextInput(matchId, field)
+      }, 50)
+    }
+  }
+
+  // Prevent leaving input if empty on Enter or Tab
+  const handlePredictionKeyDown = (e, matchId, field) => {
+    const val = predictions[matchId]?.[field]
+    const isEmpty = val === null || val === undefined || val === ''
+
+    if (e.key === 'Tab' || e.key === 'Enter') {
+      if (isEmpty) {
+        e.preventDefault()
+        return
+      }
+
+      if (e.key === 'Enter') {
+        e.preventDefault()
+        focusNextInput(matchId, field)
+      }
+    }
+  }
+
+  // Enforce sequence: redirect focus to first empty match prediction input if user clicks ahead
+  const handleInputFocus = (e, matchId, field) => {
+    for (let mId = 1; mId <= 72; mId++) {
+      const matchObj = matches.find(m => m.id === mId)
+      if (matchObj && isMatchStarted(matchObj.date)) continue
+
+      const pred = predictions[mId]
+      const t1Val = pred?.team1
+      const isT1Empty = t1Val === null || t1Val === undefined || t1Val === ''
+
+      if (isT1Empty) {
+        if (mId < matchId || (mId === matchId && field === 'team2')) {
+          e.preventDefault()
+          const firstEmpty = document.getElementById(`input-match-${mId}-team1`)
+          if (firstEmpty) {
+            firstEmpty.focus()
+            return
+          }
+        }
+        break
+      }
+
+      const t2Val = pred?.team2
+      const isT2Empty = t2Val === null || t2Val === undefined || t2Val === ''
+
+      if (isT2Empty) {
+        if (mId < matchId) {
+          e.preventDefault()
+          const firstEmpty = document.getElementById(`input-match-${mId}-team2`)
+          if (firstEmpty) {
+            firstEmpty.focus()
+            return
+          }
+        }
+        break
+      }
+    }
+  }
+
   // Handle score change for real results
   const handleRealScoreChange = (matchId, team, score) => {
     setRealResults(prev => ({
@@ -997,21 +1099,35 @@ function App() {
                             <div className="match-teams">
                               <div className="team">{getTeamName(match.team1_id)}</div>
                               <input
-                                type="number" min="0" className="team-input"
+                                type="number" min="0" max="9" className="team-input"
                                 id={`input-match-${match.id}-team1`}
                                 value={predictions[match.id]?.team1 ?? ''}
-                                onChange={(e) => handleScoreChange(match.id, 'team1', e.target.value)}
-                                onKeyDown={(e) => ['e', 'E', '+', '-', '.', ','].includes(e.key) && e.preventDefault()}
+                                onChange={(e) => handlePredictionInputChange(match.id, 'team1', e.target.value)}
+                                onKeyDown={(e) => {
+                                  if (['e', 'E', '+', '-', '.', ','].includes(e.key)) {
+                                    e.preventDefault()
+                                    return
+                                  }
+                                  handlePredictionKeyDown(e, match.id, 'team1')
+                                }}
+                                onFocus={(e) => handleInputFocus(e, match.id, 'team1')}
                                 placeholder="0"
                                 disabled={started}
                               />
                               <span className="vs-badge">VS</span>
                               <input
-                                type="number" min="0" className="team-input"
+                                type="number" min="0" max="9" className="team-input"
                                 id={`input-match-${match.id}-team2`}
                                 value={predictions[match.id]?.team2 ?? ''}
-                                onChange={(e) => handleScoreChange(match.id, 'team2', e.target.value)}
-                                onKeyDown={(e) => ['e', 'E', '+', '-', '.', ','].includes(e.key) && e.preventDefault()}
+                                onChange={(e) => handlePredictionInputChange(match.id, 'team2', e.target.value)}
+                                onKeyDown={(e) => {
+                                  if (['e', 'E', '+', '-', '.', ','].includes(e.key)) {
+                                    e.preventDefault()
+                                    return
+                                  }
+                                  handlePredictionKeyDown(e, match.id, 'team2')
+                                }}
+                                onFocus={(e) => handleInputFocus(e, match.id, 'team2')}
                                 placeholder="0"
                                 disabled={started}
                               />
