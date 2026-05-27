@@ -42,8 +42,14 @@ function App() {
   const [showManualModal, setShowManualModal] = useState(false)
   const [showSuccessModal, setShowSuccessModal] = useState(false)
   // New state to track email validation and Tab press
-  const [emailReady, setEmailReady] = useState(false)
   const [emailConfirmed, setEmailConfirmed] = useState(false)
+
+  // Compute email validity dynamically
+  const isEmailInvalid = useMemo(() => {
+    if (userEmail.trim() === '') return false
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    return !emailRegex.test(userEmail.trim())
+  }, [userEmail])
 
   const toggleJornada = (jornadaName) => {
     setExpandedJornadas(prev => ({ ...prev, [jornadaName]: !prev[jornadaName] }))
@@ -881,16 +887,21 @@ function App() {
               />
               <input
                 type="email"
-                className="user-name-input glass-panel"
+                className={`user-name-input glass-panel ${isEmailInvalid ? 'input-error' : ''}`}
                 placeholder="Correo Electrónico"
                 value={userEmail}
                 onChange={(e) => {
                   setUserEmail(e.target.value);
-                  // Reset confirmation if email changes
                   setEmailConfirmed(false);
                 }}
+                onBlur={() => {
+                  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                  if (emailRegex.test(userEmail.trim())) {
+                    setEmailConfirmed(true);
+                  }
+                }}
                 onKeyDown={(e) => {
-                  if (e.key === 'Tab') {
+                  if (e.key === 'Enter' || e.key === 'Tab') {
                     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                     if (emailRegex.test(userEmail.trim())) {
                       setEmailConfirmed(true);
@@ -899,6 +910,11 @@ function App() {
                 }}
               />
             </div>
+            {isEmailInvalid && (
+              <span className="email-error-message">
+                ⚠️ Por favor ingresa un correo electrónico con formato correcto (ejemplo@dominio.com).
+              </span>
+            )}
           </div>
 
 

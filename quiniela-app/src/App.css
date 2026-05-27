@@ -755,3 +755,19 @@
   }
 }
 
+/* Email field validation styles */
+.user-name-input.input-error {
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 10px rgba(255, 75, 43, 0.3) !important;
+}
+
+.email-error-message {
+  color: var(--accent);
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-align: center;
+  margin-top: 0.5rem;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+
