@@ -2,6 +2,8 @@
 import { useState, useEffect, useMemo } from 'react'
 import emailjs from '@emailjs/browser'
 import { supabase } from './supabaseClient'
+import ExcelJS from 'exceljs'
+import { saveAs } from 'file-saver'
 import './App.css'
 import trophyImg from './assets/trophy.png'
 import mascotImg from './assets/mascot.png'
@@ -613,6 +615,137 @@ function App() {
     }
   }, [allQuinielas, matches, realResults])
 
+  const exportToExcel = async () => {
+    const workbook = new ExcelJS.Workbook()
+    const worksheet = workbook.addWorksheet('Ranking Quinielas')
+
+    // Columns
+    const columns = [
+      { header: 'Pos', key: 'pos', width: 6 },
+      { header: 'Participante', key: 'name', width: 30 },
+      { header: 'Total', key: 'total', width: 8 },
+      { header: 'Ex', key: 'exact', width: 6 },
+      { header: 'Pa', key: 'partial', width: 6 }
+    ]
+
+    rankingInfo.groupMatches.forEach(m => {
+      columns.push({ header: `P${m.id}`, key: `m${m.id}`, width: 8 })
+    })
+
+    worksheet.columns = columns
+
+    // Header styling
+    const headerRow = worksheet.getRow(1)
+    headerRow.eachCell((cell) => {
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { arg: 'FF0A0F1E' } }
+      cell.font = { color: { arg: 'FF00F2FE' }, bold: true }
+      cell.alignment = { horizontal: 'center', vertical: 'middle' }
+      cell.border = {
+        top: { style: 'thin', color: { arg: 'FF00F2FE' } },
+        left: { style: 'thin', color: { arg: 'FF00F2FE' } },
+        bottom: { style: 'thin', color: { arg: 'FF00F2FE' } },
+        right: { style: 'thin', color: { arg: 'FF00F2FE' } }
+      }
+    })
+
+    // Real Results Row
+    const realResultsData = {
+      pos: '-',
+      name: 'RESULTADO REAL',
+      total: 'Score Oficial',
+      exact: '',
+      partial: ''
+    }
+    rankingInfo.groupMatches.forEach(m => {
+      const isFinished = m.score_team1 !== null && m.score_team2 !== null;
+      realResultsData[`m${m.id}`] = isFinished ? `${m.score_team1}-${m.score_team2}` : 'NP'
+    })
+    
+    const realRow = worksheet.addRow(realResultsData)
+    realRow.eachCell((cell, colNumber) => {
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { arg: 'FF0096A0' } }
+      cell.font = { color: { arg: colNumber <= 2 ? 'FF00F2FE' : 'FFFFFFFF' }, bold: true }
+      cell.alignment = { horizontal: 'center', vertical: 'middle' }
+      if (colNumber === 2) cell.alignment = { horizontal: 'left', vertical: 'middle' }
+      if (colNumber === 3) {
+        worksheet.mergeCells('C2:E2')
+        cell.alignment = { horizontal: 'center', vertical: 'middle' }
+      }
+    })
+
+    // Users Rows
+    rankingInfo.scores.forEach((user) => {
+      const distinctPoints = [...new Set(rankingInfo.scores.map(s => s.points))]
+      const place = distinctPoints.indexOf(user.points) + 1
+
+      const rowData = {
+        pos: place,
+        name: user.name,
+        total: user.points,
+        exact: user.exactMatches,
+        partial: user.partialMatches
+      }
+
+      rankingInfo.groupMatches.forEach(m => {
+        const pred = user.predictions[m.id]
+        const pts = user.matchPoints[m.id] || 0
+        const isFinished = m.score_team1 !== null && m.score_team2 !== null
+        
+        // Add score and points to excel cell
+        const scoreText = pred ? `${pred.team1}-${pred.team2}` : '-'
+        if (isFinished) {
+          rowData[`m${m.id}`] = `${scoreText}\n(${pts})`
+        } else {
+          rowData[`m${m.id}`] = scoreText
+        }
+      })
+
+      const row = worksheet.addRow(rowData)
+      
+      row.getCell(1).alignment = { horizontal: 'center', vertical: 'middle' }
+      row.getCell(2).alignment = { horizontal: 'left', vertical: 'middle' }
+      row.getCell(3).font = { bold: true, color: { arg: 'FF00F2FE' } }
+      row.getCell(3).alignment = { horizontal: 'center', vertical: 'middle' }
+      row.getCell(4).alignment = { horizontal: 'center', vertical: 'middle' }
+      row.getCell(5).alignment = { horizontal: 'center', vertical: 'middle' }
+
+      // Rank colors
+      if (place === 1) row.getCell(1).font = { color: { arg: 'FFD4AF37' }, bold: true } // Gold
+      if (place === 2) row.getCell(1).font = { color: { arg: 'FF9E9E9E' }, bold: true } // Silver
+      if (place === 3) row.getCell(1).font = { color: { arg: 'FFCD7F32' }, bold: true } // Bronze
+      if (place === 1) row.getCell(2).font = { color: { arg: 'FFD4AF37' }, bold: true }
+      if (place === 2) row.getCell(2).font = { color: { arg: 'FF9E9E9E' }, bold: true }
+      if (place === 3) row.getCell(2).font = { color: { arg: 'FFCD7F32' }, bold: true }
+
+      rankingInfo.groupMatches.forEach((m, mIdx) => {
+        const colNum = 6 + mIdx
+        const cell = row.getCell(colNum)
+        cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true }
+        
+        const isFinished = m.score_team1 !== null && m.score_team2 !== null
+        if (isFinished) {
+          const pts = user.matchPoints[m.id] || 0
+          if (pts === 5) {
+            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { arg: 'FFC8E6C9' } } // Lighter green
+            cell.font = { color: { arg: 'FF1B5E20' }, bold: true }
+          } else if (pts === 3) {
+            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { arg: 'FFE8F5E9' } } // Paler green
+            cell.font = { color: { arg: 'FF2E7D32' } }
+          } else if (pts === 1) {
+            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { arg: 'FFFFF9C4' } } // Light yellow
+            cell.font = { color: { arg: 'FFF57F17' } }
+          } else {
+            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { arg: 'FFFFCDD2' } } // Light red
+            cell.font = { color: { arg: 'FFC62828' } }
+          }
+        }
+      })
+    })
+
+    const buffer = await workbook.xlsx.writeBuffer()
+    saveAs(new Blob([buffer]), 'Ranking_Quinielas_Mundial2026.xlsx')
+  }
+
   return (
     <div className="app-container">
       <div className="banner-triptych" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '2rem', marginBottom: '2.5rem', width: '100%' }}>
@@ -1015,8 +1148,11 @@ function App() {
 
       {currentView === 'ranking' && (
         <section className="ranking-section">
-          <div className="header" style={{ marginBottom: '2rem' }}>
+          <div className="header" style={{ marginBottom: '2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
             <h2>Ranking de Quinielas</h2>
+            <button className="save-btn" onClick={exportToExcel} style={{ padding: '0.8rem 1.5rem', fontSize: '1rem' }}>
+              Descargar Excel 📊
+            </button>
           </div>
 
           <div className="stats-dashboard glass-panel-heavy" style={{ marginBottom: '2rem', padding: '1.5rem', display: 'flex', justifyContent: 'space-around', flexWrap: 'wrap', gap: '1rem' }}>
