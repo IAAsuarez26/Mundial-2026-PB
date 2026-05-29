@@ -785,5 +785,20 @@
   transform: translateY(0);
 }
 
+.user-name-input[readonly] {
+  background: rgba(255, 255, 255, 0.03) !important;
+  color: rgba(255, 255, 255, 0.5) !important;
+  border-color: rgba(0, 242, 254, 0.15) !important;
+  cursor: not-allowed;
+  box-shadow: none !important;
+}
 
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
 
+.validating-spinner {
+  display: inline-block;
+  animation: spin 1.5s linear infinite;
+}

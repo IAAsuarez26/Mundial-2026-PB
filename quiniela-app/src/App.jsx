@@ -43,13 +43,67 @@ function App() {
   const [showSuccessModal, setShowSuccessModal] = useState(false)
   // New state to track email validation and Tab press
   const [emailConfirmed, setEmailConfirmed] = useState(false)
+  const [cedulaError, setCedulaError] = useState('')
+  const [isValidatingCedula, setIsValidatingCedula] = useState(false)
 
-  // Compute email validity dynamically
-  const isEmailInvalid = useMemo(() => {
-    if (userEmail.trim() === '') return false
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    return !emailRegex.test(userEmail.trim())
-  }, [userEmail])
+  // Validate Cédula in database and load user details
+  useEffect(() => {
+    const cleanCedula = userCedula.trim().replace(/\D/g, '')
+    if (cleanCedula === '') {
+      setUserName('')
+      setUserEmail('')
+      setEmailConfirmed(false)
+      setCedulaError('')
+      return
+    }
+
+    setIsValidatingCedula(true)
+    setCedulaError('')
+
+    const delayDebounceFn = setTimeout(async () => {
+      try {
+        const parsedCedula = parseInt(cleanCedula, 10)
+        if (isNaN(parsedCedula)) {
+          setCedulaError('⚠️ Cédula inválida. Ingrese solo números.')
+          setUserName('')
+          setUserEmail('')
+          setEmailConfirmed(false)
+          setIsValidatingCedula(false)
+          return
+        }
+
+        const { data, error } = await supabase
+          .from('listadoparticipantes')
+          .select('nombres, correo')
+          .eq('cedula', parsedCedula)
+          .maybeSingle()
+
+        if (error) {
+          console.error("Error al validar cédula:", error)
+          setCedulaError('⚠️ Error de conexión al validar cédula.')
+          setUserName('')
+          setUserEmail('')
+          setEmailConfirmed(false)
+        } else if (!data) {
+          setCedulaError('⚠️ Cédula no habilitada para participar.')
+          setUserName('')
+          setUserEmail('')
+          setEmailConfirmed(false)
+        } else {
+          setUserName(data.nombres)
+          setUserEmail(data.correo || '')
+          setEmailConfirmed(true)
+        }
+      } catch (err) {
+        console.error("Error:", err)
+        setCedulaError('⚠️ Ocurrió un error al validar.')
+      } finally {
+        setIsValidatingCedula(false)
+      }
+    }, 500)
+
+    return () => clearTimeout(delayDebounceFn)
+  }, [userCedula])
 
   // Check if Cédula, Nombre and email validation are complete
   const isUserInfoComplete = useMemo(() => {
@@ -411,14 +465,8 @@ function App() {
 
   // Save current user predictions
   const savePredictions = async () => {
-    if (!userName.trim() || !userCedula.trim() || !userEmail.trim()) {
-      alert("Por favor ingresa tu Nombre, Cédula y Email.")
-      return
-    }
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    if (!emailRegex.test(userEmail.trim())) {
-      alert("Email inválido.")
+    if (!userName.trim() || !userCedula.trim()) {
+      alert("Por favor ingresa tu Cédula para cargar tus datos.")
       return
     }
 
@@ -487,6 +535,13 @@ function App() {
   }
 
   const sendEmail = () => {
+    // If email is empty or invalid format, skip sending but resolve
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!userEmail || !userEmail.trim() || !emailRegex.test(userEmail.trim())) {
+      console.log(`[Email] Skipping email sending for "${userName}" (email is empty or invalid: "${userEmail}")`)
+      return Promise.resolve()
+    }
+
     // Reusable short style strings
     const BD = 'border:1px solid #ddd'               // border
     const CA = `${BD};text-align:center`              // center-aligned stat cell
@@ -990,50 +1045,47 @@ function App() {
       {currentView === 'predict' && (
         <>
           <div className="user-input-section" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
+              <div style={{ position: 'relative', display: 'inline-block' }}>
+                <input
+                  type="text"
+                  className="user-name-input glass-panel"
+                  placeholder="Cédula"
+                  title="Documento de Identidad"
+                  value={userCedula}
+                  onChange={(e) => setUserCedula(e.target.value)}
+                />
+                {isValidatingCedula && (
+                  <span className="validating-spinner" style={{
+                    position: 'absolute',
+                    right: '15px',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    fontSize: '0.9rem',
+                    color: 'var(--primary-color)'
+                  }}>
+                    ⏳
+                  </span>
+                )}
+              </div>
               <input
                 type="text"
                 className="user-name-input glass-panel"
-                placeholder="Cédula / DNI / Pasaporte"
-                title="Documento de Identidad"
-                value={userCedula}
-                onChange={(e) => setUserCedula(e.target.value)}
-              />
-              <input
-                type="text"
-                className="user-name-input glass-panel"
-                placeholder="Nombre / Apodo"
+                placeholder="Nombre Completo"
                 value={userName}
-                onChange={(e) => setUserName(e.target.value)}
+                readOnly
               />
               <input
                 type="email"
-                className={`user-name-input glass-panel ${isEmailInvalid ? 'input-error' : ''}`}
+                className="user-name-input glass-panel"
                 placeholder="Correo Electrónico"
                 value={userEmail}
-                onChange={(e) => {
-                  setUserEmail(e.target.value);
-                  setEmailConfirmed(false);
-                }}
-                onBlur={() => {
-                  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                  if (emailRegex.test(userEmail.trim())) {
-                    setEmailConfirmed(true);
-                  }
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === 'Tab') {
-                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                    if (emailRegex.test(userEmail.trim())) {
-                      setEmailConfirmed(true);
-                    }
-                  }
-                }}
+                readOnly
               />
             </div>
-            {isEmailInvalid && (
+            {cedulaError && (
               <span className="email-error-message">
-                ⚠️ Por favor ingresa un correo electrónico con formato correcto (ejemplo@dominio.com).
+                {cedulaError}
               </span>
             )}
           </div>
@@ -1048,7 +1100,7 @@ function App() {
               animation: 'fadeIn 0.5s ease-in-out'
             }}>
               <span style={{ color: 'var(--text-muted)', fontSize: '1.1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
-                🔒 Ingresa tu Cédula, Nombre y Correo electrónico válido para desbloquear las predicciones y posiciones de grupos.
+                🔒 Ingresa tu Cédula habilitada para desbloquear tus predicciones y posiciones de grupos.
               </span>
             </div>
           )}
