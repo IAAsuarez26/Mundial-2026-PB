@@ -41,6 +41,7 @@ function App() {
   const [showRulesModal, setShowRulesModal] = useState(false)
   const [showManualModal, setShowManualModal] = useState(false)
   const [showSuccessModal, setShowSuccessModal] = useState(false)
+  const [showDuplicateModal, setShowDuplicateModal] = useState(false)
   // New state to track email validation and Tab press
   const [emailConfirmed, setEmailConfirmed] = useState(false)
   const [cedulaError, setCedulaError] = useState('')
@@ -500,7 +501,7 @@ function App() {
         .eq('cedula', userCedula.trim())
 
       if (existing && existing.length >= 1) {
-        alert("⚠️ Este documento de identidad ya tiene una quiniela registrada.\n\nSolo se permite UNA quiniela por participante. Si necesitas modificar tus pronósticos, debes comunicarte con el administrador para que elimine tu registro y puedas volver a participar.")
+        setShowDuplicateModal(true)
         setIsSaving(false)
         return
       }
@@ -1286,6 +1287,27 @@ function App() {
                 </p>
                 <button className="save-btn" onClick={() => window.location.reload()} style={{ width: '100%', fontSize: '1.1rem' }}>
                   ¡Entendido!
+                </button>
+              </div>
+            </div>
+          )}
+
+          {showDuplicateModal && (
+            <div className="modal-overlay">
+              <div className="modal-content glass-panel" style={{ textAlign: 'center', maxWidth: '480px' }}>
+                <div style={{ marginBottom: '1.5rem' }}>
+                  <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#e74c3c" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                  </svg>
+                </div>
+                <h2 className="text-gradient" style={{ margin: '0 0 1.2rem', fontSize: '2.2rem', fontWeight: '800' }}>Quiniela Mundial P&B 2026</h2>
+                <p style={{ fontSize: '1.25rem', color: 'var(--text-main)', lineHeight: '1.7', marginBottom: '2rem', fontWeight: '600' }}>
+                  Su cédula de identidad ya está asociada a una quiniela. Solo puede participar una vez.
+                </p>
+                <button className="save-btn" onClick={() => setShowDuplicateModal(false)} style={{ width: '100%', fontSize: '1.1rem' }}>
+                  Aceptar
                 </button>
               </div>
             </div>
