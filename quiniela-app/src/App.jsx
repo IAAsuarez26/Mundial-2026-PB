@@ -91,9 +91,30 @@ function App() {
           setUserEmail('')
           setEmailConfirmed(false)
         } else {
-          setUserName(data.nombres)
-          setUserEmail(data.correo || '')
-          setEmailConfirmed(true)
+          // Check if this participant already has a quiniela registered
+          const { data: existingQ, error: qError } = await supabase
+            .from('quinielas')
+            .select('id')
+            .eq('cedula', parsedCedula)
+            .maybeSingle()
+
+          if (qError) {
+            console.error("Error al validar quiniela existente:", qError)
+            setCedulaError('⚠️ Error de conexión al verificar registro.')
+            setUserName('')
+            setUserEmail('')
+            setEmailConfirmed(false)
+          } else if (existingQ) {
+            // Already registered! Clear name/email, lock, and show warning modal
+            setUserName('')
+            setUserEmail('')
+            setEmailConfirmed(false)
+            setShowDuplicateModal(true)
+          } else {
+            setUserName(data.nombres)
+            setUserEmail(data.correo || '')
+            setEmailConfirmed(true)
+          }
         }
       } catch (err) {
         console.error("Error:", err)
