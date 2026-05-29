@@ -21,6 +21,7 @@ function App() {
   const [userName, setUserName] = useState('')
   const [userCedula, setUserCedula] = useState('')
   const [userEmail, setUserEmail] = useState('')
+  const [userEmpresa, setUserEmpresa] = useState('')
   const [predictions, setPredictions] = useState({})
   const [expandedJornadas, setExpandedJornadas] = useState({})
   const [showGroups, setShowGroups] = useState(false)
@@ -53,6 +54,7 @@ function App() {
     if (cleanCedula === '') {
       setUserName('')
       setUserEmail('')
+      setUserEmpresa('')
       setEmailConfirmed(false)
       setCedulaError('')
       return
@@ -68,6 +70,7 @@ function App() {
           setCedulaError('⚠️ Cédula inválida. Ingrese solo números.')
           setUserName('')
           setUserEmail('')
+          setUserEmpresa('')
           setEmailConfirmed(false)
           setIsValidatingCedula(false)
           return
@@ -75,7 +78,7 @@ function App() {
 
         const { data, error } = await supabase
           .from('listadoparticipantes')
-          .select('nombres, correo')
+          .select('nombres, correo, empresa')
           .eq('cedula', parsedCedula)
           .maybeSingle()
 
@@ -84,11 +87,13 @@ function App() {
           setCedulaError('⚠️ Error de conexión al validar cédula.')
           setUserName('')
           setUserEmail('')
+          setUserEmpresa('')
           setEmailConfirmed(false)
         } else if (!data) {
           setCedulaError('⚠️ Cédula no habilitada para participar.')
           setUserName('')
           setUserEmail('')
+          setUserEmpresa('')
           setEmailConfirmed(false)
         } else {
           // Check if this participant already has a quiniela registered
@@ -103,16 +108,19 @@ function App() {
             setCedulaError('⚠️ Error de conexión al verificar registro.')
             setUserName('')
             setUserEmail('')
+            setUserEmpresa('')
             setEmailConfirmed(false)
           } else if (existingQ) {
-            // Already registered! Clear name/email, lock, and show warning modal
+            // Already registered! Clear name/email/empresa, lock, and show warning modal
             setUserName('')
             setUserEmail('')
+            setUserEmpresa('')
             setEmailConfirmed(false)
             setShowDuplicateModal(true)
           } else {
             setUserName(data.nombres)
             setUserEmail(data.correo || '')
+            setUserEmpresa(data.empresa || '')
             setEmailConfirmed(true)
           }
         }
@@ -663,6 +671,7 @@ function App() {
     setUserName('')
     setUserCedula('')
     setUserEmail('')
+    setUserEmpresa('')
     setPredictions({})
   }
 
@@ -1102,6 +1111,13 @@ function App() {
                 className="user-name-input glass-panel"
                 placeholder="Correo Electrónico"
                 value={userEmail}
+                readOnly
+              />
+              <input
+                type="text"
+                className="user-name-input glass-panel"
+                placeholder="Empresa"
+                value={userEmpresa}
                 readOnly
               />
             </div>
