@@ -520,6 +520,7 @@ function App() {
         cedula: userCedula.trim(),
         nombre: userName.trim(),
         email: userEmail.trim(),
+        empresa: userEmpresa.trim(),
         updated_at: new Date().toISOString()
       })
 
