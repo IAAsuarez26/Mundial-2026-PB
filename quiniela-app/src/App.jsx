@@ -43,6 +43,7 @@ function App() {
   const [showManualModal, setShowManualModal] = useState(false)
   const [showSuccessModal, setShowSuccessModal] = useState(false)
   const [showDuplicateModal, setShowDuplicateModal] = useState(false)
+  const [cedulaToEmpresa, setCedulaToEmpresa] = useState({})
   // New state to track email validation and Tab press
   const [emailConfirmed, setEmailConfirmed] = useState(false)
   const [cedulaError, setCedulaError] = useState('')
@@ -118,9 +119,14 @@ function App() {
             setEmailConfirmed(false)
             setShowDuplicateModal(true)
           } else {
+            const companyMap = {
+              'PB': 'Ponce & Benzo',
+              'LP': 'Laboratorios Ponce',
+              'PK': 'Picking'
+            };
             setUserName(data.nombres)
             setUserEmail(data.correo || '')
-            setUserEmpresa(data.empresa || '')
+            setUserEmpresa(companyMap[data.empresa] || data.empresa || '')
             setEmailConfirmed(true)
           }
         }
@@ -208,6 +214,18 @@ function App() {
           return acc
         }, {})
         setRealResults(resultsObj)
+      }
+
+      // 5. Fetch ListadoParticipantes to map cedula -> empresa
+      const { data: lpData } = await supabase
+        .from('listadoparticipantes')
+        .select('cedula, empresa')
+      if (lpData) {
+        const mapping = {}
+        lpData.forEach(item => {
+          mapping[String(item.cedula)] = item.empresa
+        })
+        setCedulaToEmpresa(mapping)
       }
     }
 
@@ -816,8 +834,39 @@ function App() {
         }
         matchPoints[match.id] = pts
       })
-      scores.push({ id, name: userName, points, exactMatches, partialMatches, matchPoints, predictions: userPreds })
+      const empresaCode = cedulaToEmpresa[String(userData.cedula)] || 'Sin Empresa'
+      const companyMap = {
+        'PB': 'Ponce & Benzo',
+        'LP': 'Laboratorios Ponce',
+        'PK': 'Picking'
+      }
+      const userEmpresa = companyMap[empresaCode] || empresaCode
+      scores.push({
+        id,
+        name: userName,
+        points,
+        exactMatches,
+        partialMatches,
+        matchPoints,
+        predictions: userPreds,
+        empresa: userEmpresa
+      })
     }
+
+    // Group scores by empresa
+    const scoresByEmpresa = {}
+    scores.forEach(s => {
+      const emp = s.empresa
+      if (!scoresByEmpresa[emp]) {
+        scoresByEmpresa[emp] = []
+      }
+      scoresByEmpresa[emp].push(s)
+    })
+
+    // Sort scores inside each company group
+    Object.keys(scoresByEmpresa).forEach(emp => {
+      scoresByEmpresa[emp].sort((a, b) => b.points - a.points)
+    })
 
     return {
       playedMatches: playedMatchesCount,
@@ -825,9 +874,10 @@ function App() {
       maxPossiblePoints,
       totalGroupMatches,
       groupMatches, // Exporting this for the table headers
-      scores: scores.sort((a, b) => b.points - a.points)
+      scores: scores.sort((a, b) => b.points - a.points),
+      scoresByEmpresa
     }
-  }, [allQuinielas, matches, realResults])
+  }, [allQuinielas, matches, realResults, cedulaToEmpresa])
 
   const exportToExcel = async () => {
     const workbook = new ExcelJS.Workbook()
@@ -1532,80 +1582,91 @@ function App() {
             </div>
           </div>
 
-          <div className="ranking-container glass-panel" style={{ overflowX: 'auto', padding: '0' }}>
-            {rankingInfo.scores.length === 0 ? (
-              <p style={{ textAlign: 'center', padding: '2rem' }}>Aún no hay quinielas registradas.</p>
-            ) : (
-              <table className="consolidated-table">
-                <thead>
-                  <tr>
-                    <th className="sticky-col first-col">Pos</th>
-                    <th className="sticky-col second-col">Participante</th>
-                    <th>Total</th>
-                    <th>Ex</th>
-                    <th>Pa</th>
-                    {rankingInfo.groupMatches.map(m => (
-                      <th key={m.id} title={`${getTeamName(m.team1_id)} vs ${getTeamName(m.team2_id)}`}>
-                        P{m.id}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {/* Real Results Row */}
-                  <tr style={{ background: 'rgba(0, 242, 254, 0.1)', fontWeight: 'bold' }}>
-                    <td className="sticky-col first-col" style={{ background: 'rgba(0, 150, 160, 0.95)' }}>-</td>
-                    <td className="sticky-col second-col" style={{ background: 'rgba(0, 150, 160, 0.95)', color: 'var(--primary-color)' }}>RESULTADO REAL</td>
-                    <td colSpan="3" style={{ textAlign: 'center', fontSize: '0.75rem', color: 'var(--text-muted)' }}>Score Oficial</td>
-                    {rankingInfo.groupMatches.map(m => {
-                      const isFinished = m.score_team1 !== null && m.score_team2 !== null;
-                      return (
-                        <td key={m.id} style={{ color: isFinished ? 'var(--primary-color)' : '#888' }}>
-                          {isFinished ? `${m.score_team1}-${m.score_team2}` : 'NP'}
-                        </td>
-                      );
-                    })}
-                  </tr>
-                  {rankingInfo.scores.map((user, idx) => {
-                    const distinctPoints = [...new Set(rankingInfo.scores.map(s => s.points))]
-                    const place = distinctPoints.indexOf(user.points) + 1
-                    const rankClass = place === 1 ? 'rank-1st' : place === 2 ? 'rank-2nd' : place === 3 ? 'rank-3rd' : ''
-
-                    return (
-                      <tr key={user.id} className={rankClass}>
-                        <td className="sticky-col first-col">{place}</td>
-                        <td className="sticky-col second-col">{user.name}</td>
-                        <td className="total-pts">{user.points}</td>
-                        <td>{user.exactMatches}</td>
-                        <td>{user.partialMatches}</td>
-                        {rankingInfo.groupMatches.map(m => {
-                          const pts = user.matchPoints[m.id] || 0
-                          const pred = user.predictions[m.id]
-                          const isFinished = m.score_team1 !== null && m.score_team2 !== null
-                          let ptsClass = ''
-                          if (isFinished) {
-                            if (pts === 5) ptsClass = 'pts-5'
-                            else if (pts === 3) ptsClass = 'pts-3'
-                            else if (pts === 1) ptsClass = 'pts-1'
-                            else ptsClass = 'pts-0'
-                          }
-                          const scoreText = pred ? `${pred.team1}-${pred.team2}` : '-'
+          {Object.keys(rankingInfo.scoresByEmpresa).length === 0 ? (
+            <div className="ranking-container glass-panel" style={{ padding: '2rem', textAlign: 'center' }}>
+              <p>Aún no hay quinielas registradas.</p>
+            </div>
+          ) : (
+            Object.entries(rankingInfo.scoresByEmpresa).sort().map(([empresaName, companyScores]) => {
+              return (
+                <div key={empresaName} className="company-ranking-group" style={{ marginBottom: '4rem' }}>
+                  <h3 className="text-gradient" style={{ fontSize: '1.8rem', fontWeight: '800', marginBottom: '1.2rem', paddingLeft: '0.5rem', borderLeft: '4px solid var(--primary-color)' }}>
+                    🏢 Empresa: {empresaName}
+                  </h3>
+                  <div className="ranking-container glass-panel" style={{ overflowX: 'auto', padding: '0' }}>
+                    <table className="consolidated-table">
+                      <thead>
+                        <tr>
+                          <th className="sticky-col first-col">Pos</th>
+                          <th className="sticky-col second-col">Participante</th>
+                          <th>Total</th>
+                          <th>Ex</th>
+                          <th>Pa</th>
+                          {rankingInfo.groupMatches.map(m => (
+                            <th key={m.id} title={`${getTeamName(m.team1_id)} vs ${getTeamName(m.team2_id)}`}>
+                              P{m.id}
+                            </th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {/* Real Results Row */}
+                        <tr style={{ background: 'rgba(0, 242, 254, 0.1)', fontWeight: 'bold' }}>
+                          <td className="sticky-col first-col" style={{ background: 'rgba(0, 150, 160, 0.95)' }}>-</td>
+                          <td className="sticky-col second-col" style={{ background: 'rgba(0, 150, 160, 0.95)', color: 'var(--primary-color)' }}>RESULTADO REAL</td>
+                          <td colSpan="3" style={{ textAlign: 'center', fontSize: '0.75rem', color: 'var(--text-muted)' }}>Score Oficial</td>
+                          {rankingInfo.groupMatches.map(m => {
+                            const isFinished = m.score_team1 !== null && m.score_team2 !== null;
+                            return (
+                              <td key={m.id} style={{ color: isFinished ? 'var(--primary-color)' : '#888' }}>
+                                {isFinished ? `${m.score_team1}-${m.score_team2}` : 'NP'}
+                              </td>
+                            );
+                          })}
+                        </tr>
+                        {companyScores.map((user) => {
+                          const distinctPoints = [...new Set(companyScores.map(s => s.points))]
+                          const place = distinctPoints.indexOf(user.points) + 1
+                          const rankClass = place === 1 ? 'rank-1st' : place === 2 ? 'rank-2nd' : place === 3 ? 'rank-3rd' : ''
 
                           return (
-                            <td key={m.id} className={ptsClass}>
-                              <div style={{ fontSize: '0.8rem' }}>{scoreText}</div>
-                              {pts > 0 && <div style={{ fontSize: '0.7rem', fontWeight: 800 }}>({pts})</div>}
-                              {isFinished && pts === 0 && <div style={{ fontSize: '0.7rem', fontWeight: 800 }}>(0)</div>}
-                            </td>
+                            <tr key={user.id} className={rankClass}>
+                              <td className="sticky-col first-col">{place}</td>
+                              <td className="sticky-col second-col">{user.name}</td>
+                              <td className="total-pts">{user.points}</td>
+                              <td>{user.exactMatches}</td>
+                              <td>{user.partialMatches}</td>
+                              {rankingInfo.groupMatches.map(m => {
+                                const pts = user.matchPoints[m.id] || 0
+                                const pred = user.predictions[m.id]
+                                const isFinished = m.score_team1 !== null && m.score_team2 !== null
+                                let ptsClass = ''
+                                if (isFinished) {
+                                  if (pts === 5) ptsClass = 'pts-5'
+                                  else if (pts === 3) ptsClass = 'pts-3'
+                                  else if (pts === 1) ptsClass = 'pts-1'
+                                  else ptsClass = 'pts-0'
+                                }
+                                const scoreText = pred ? `${pred.team1}-${pred.team2}` : '-'
+
+                                return (
+                                  <td key={m.id} className={ptsClass}>
+                                    <div style={{ fontSize: '0.8rem' }}>{scoreText}</div>
+                                    {pts > 0 && <div style={{ fontSize: '0.7rem', fontWeight: 800 }}>({pts})</div>}
+                                    {isFinished && pts === 0 && <div style={{ fontSize: '0.7rem', fontWeight: 800 }}>(0)</div>}
+                                  </td>
+                                )
+                              })}
+                            </tr>
                           )
                         })}
-                      </tr>
-                    )
-                  })}
-                </tbody>
-              </table>
-            )}
-          </div>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )
+            })
+          )}
         </section>
       )}
 
