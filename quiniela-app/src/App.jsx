@@ -1141,7 +1141,7 @@ function App() {
               <div style={{ position: 'relative', display: 'inline-block' }}>
                 <input
                   type="text"
-                  className="user-name-input glass-panel"
+                  className="user-name-input glass-panel input-cedula"
                   placeholder="Cédula"
                   title="Documento de Identidad"
                   value={userCedula}
@@ -1176,7 +1176,7 @@ function App() {
               />
               <input
                 type="text"
-                className="user-name-input glass-panel"
+                className="user-name-input glass-panel input-empresa"
                 placeholder="Empresa"
                 value={userEmpresa}
                 readOnly
