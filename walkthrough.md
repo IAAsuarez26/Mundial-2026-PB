@@ -27,7 +27,13 @@ Se ha verificado que la aplicación funciona correctamente tanto en el entorno l
 ![Ranking Vercel Live](file:///C:/Users/asuarez/.gemini/antigravity/brain/749cf17b-bd23-49c2-8ea0-319bfba7e516/ranking_tab_with_resultado_real_1778462738944.png)
 ````
 
+### 3. Descarga de Excel Separado por Empresas
+Se ha refactorado la funcionalidad de exportación a Excel para generar un libro con múltiples pestañas (worksheets) que reflejan el estado del ranking:
+
+- **Pestaña Consolidado:** Contiene a todos los participantes ordenados por su puntuación general.
+- **Pestañas por Empresa:** Crea una pestaña independiente para cada empresa (ej. *Ponce & Benzo*, *Laboratorios Ponce*, *Picking*, etc.) mostrando únicamente a sus participantes con su posición relativa a nivel interno de la empresa, manteniendo los colores premium, formato y sistema de puntuación.
+
 ## Conclusión
-La aplicación ahora muestra la información completa del torneo y el flujo de despliegue está totalmente operativo. Los usuarios podrán ver en tiempo real cómo sus predicciones se comparan con los resultados oficiales.
+La aplicación ahora muestra la información completa del torneo, el flujo de despliegue está totalmente operativo y el archivo Excel descargado permite auditar la quiniela de forma global y por empresa de forma organizada.
 
 **URL de Producción:** [https://mundial-norteamerica-2026.vercel.app/](https://mundial-norteamerica-2026.vercel.app/)

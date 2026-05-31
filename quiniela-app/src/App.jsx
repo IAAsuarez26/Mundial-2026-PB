@@ -881,22 +881,6 @@ function App() {
 
   const exportToExcel = async () => {
     const workbook = new ExcelJS.Workbook()
-    const worksheet = workbook.addWorksheet('Ranking Quinielas')
-
-    // Columns
-    const columns = [
-      { header: 'Pos', key: 'pos', width: 6 },
-      { header: 'Participante', key: 'name', width: 30 },
-      { header: 'Total', key: 'total', width: 8 },
-      { header: 'Ex', key: 'exact', width: 6 },
-      { header: 'Pa', key: 'partial', width: 6 }
-    ]
-
-    rankingInfo.groupMatches.forEach(m => {
-      columns.push({ header: `P${m.id}`, key: `m${m.id}`, width: 8 })
-    })
-
-    worksheet.columns = columns
 
     const COLORS = {
       // ── Structural rows ──────────────────────────────────────
@@ -932,140 +916,166 @@ function App() {
 
     const solidFill = (argb) => ({ type: 'pattern', pattern: 'solid', fgColor: { argb } })
 
-    // Header row
-    const headerRow = worksheet.getRow(1)
-    headerRow.eachCell((cell) => {
-      cell.fill = solidFill(COLORS.headerBg)
-      cell.font = { color: { argb: COLORS.headerText }, bold: true }
-      cell.alignment = { horizontal: 'center', vertical: 'middle' }
-      cell.border = {
-        top:    { style: 'thin', color: { argb: COLORS.headerText } },
-        left:   { style: 'thin', color: { argb: COLORS.headerText } },
-        bottom: { style: 'thin', color: { argb: COLORS.headerText } },
-        right:  { style: 'thin', color: { argb: COLORS.headerText } }
-      }
-    })
+    const addSheet = (sheetTitle, scoresList) => {
+      // Excel limits sheet names to 31 chars and bans certain characters: \ / ? * [ ] :
+      const safeTitle = String(sheetTitle).replace(/[*?:/\\[\]]/g, '').substring(0, 31)
+      const worksheet = workbook.addWorksheet(safeTitle)
 
-    // Real Results Row
-    const realResultsData = {
-      pos: '-',
-      name: 'RESULTADO REAL',
-      total: 'Score Oficial',
-      exact: '',
-      partial: ''
-    }
-    rankingInfo.groupMatches.forEach(m => {
-      const isFinished = m.score_team1 !== null && m.score_team2 !== null
-      realResultsData[`m${m.id}`] = isFinished ? `${m.score_team1}-${m.score_team2}` : 'NP'
-    })
-
-    const realRow = worksheet.addRow(realResultsData)
-    realRow.eachCell((cell, colNumber) => {
-      if (colNumber <= 5) {
-        // Cols Pos, Participante, Total/Score, Ex, Pa → teal sólido, texto blanco
-        cell.fill = solidFill(COLORS.realIdBg)
-        cell.font = { color: { argb: COLORS.realIdText }, bold: true }
-      } else {
-        // Celdas de partidos → azul muy claro, texto oscuro
-        cell.fill = solidFill(COLORS.realDataBg)
-        cell.font = { color: { argb: COLORS.realDataText }, bold: true }
-      }
-      cell.alignment = { horizontal: 'center', vertical: 'middle' }
-      if (colNumber === 2) cell.alignment = { horizontal: 'left', vertical: 'middle', indent: 1 }
-      if (colNumber === 3) {
-        worksheet.mergeCells('C2:E2')
-        cell.alignment = { horizontal: 'center', vertical: 'middle' }
-      }
-      // NP: gris azulado, sin negrita
-      if (colNumber > 5 && cell.value === 'NP') {
-        cell.font = { color: { argb: COLORS.realNpText }, bold: false }
-      }
-    })
-
-    // Users Rows
-    rankingInfo.scores.forEach((user) => {
-      const distinctPoints = [...new Set(rankingInfo.scores.map(s => s.points))]
-      const place = distinctPoints.indexOf(user.points) + 1
-
-      const rowData = {
-        pos: place,
-        name: user.name,
-        total: user.points,
-        exact: user.exactMatches,
-        partial: user.partialMatches
-      }
+      // Columns
+      const columns = [
+        { header: 'Pos', key: 'pos', width: 6 },
+        { header: 'Participante', key: 'name', width: 30 },
+        { header: 'Total', key: 'total', width: 8 },
+        { header: 'Ex', key: 'exact', width: 6 },
+        { header: 'Pa', key: 'partial', width: 6 }
+      ]
 
       rankingInfo.groupMatches.forEach(m => {
-        const pred = user.predictions[m.id]
-        const pts = user.matchPoints[m.id] || 0
-        const isFinished = m.score_team1 !== null && m.score_team2 !== null
-        const scoreText = pred ? `${pred.team1}-${pred.team2}` : '-'
-        rowData[`m${m.id}`] = isFinished ? `${scoreText}\n(${pts})` : scoreText
+        columns.push({ header: `P${m.id}`, key: `m${m.id}`, width: 8 })
       })
 
-      const row = worksheet.addRow(rowData)
+      worksheet.columns = columns
 
-      const rowBg =
-        place === 1 ? COLORS.rank1Bg :
-        place === 2 ? COLORS.rank2Bg :
-        place === 3 ? COLORS.rank3Bg :
-        COLORS.defaultBg
-
-      for (let c = 1; c <= worksheet.columnCount; c++) {
-        row.getCell(c).fill = solidFill(rowBg)
-        // Default: dark text on light background for readability
-        row.getCell(c).font = { color: { argb: COLORS.textDark } }
-      }
-
-      row.getCell(1).alignment = { horizontal: 'center', vertical: 'middle' }
-      row.getCell(2).alignment = { horizontal: 'left', vertical: 'middle', indent: 1 }
-      row.getCell(3).alignment = { horizontal: 'center', vertical: 'middle' }
-      row.getCell(4).alignment = { horizontal: 'center', vertical: 'middle' }
-      row.getCell(5).alignment = { horizontal: 'center', vertical: 'middle' }
-
-      row.getCell(3).font = { bold: true, color: { argb: COLORS.cyan } }
-
-      if (place === 1) {
-        row.getCell(1).font = { color: { argb: COLORS.gold },   bold: true, size: 12 }
-        row.getCell(2).font = { color: { argb: COLORS.gold },   bold: true }
-        row.getCell(3).font = { color: { argb: COLORS.cyan },   bold: true }
-      } else if (place === 2) {
-        row.getCell(1).font = { color: { argb: COLORS.silver }, bold: true, size: 12 }
-        row.getCell(2).font = { color: { argb: COLORS.silver }, bold: true }
-        row.getCell(3).font = { color: { argb: COLORS.cyan },   bold: true }
-      } else if (place === 3) {
-        row.getCell(1).font = { color: { argb: COLORS.bronze }, bold: true, size: 12 }
-        row.getCell(2).font = { color: { argb: COLORS.bronze }, bold: true }
-        row.getCell(3).font = { color: { argb: COLORS.cyan },   bold: true }
-      } else {
-        row.getCell(1).font = { color: { argb: COLORS.textDark }, bold: false }
-        row.getCell(2).font = { color: { argb: COLORS.textDark } }
-        row.getCell(3).font = { bold: true, color: { argb: COLORS.cyan } }
-      }
-
-      rankingInfo.groupMatches.forEach((m, mIdx) => {
-        const colNum = 6 + mIdx
-        const cell = row.getCell(colNum)
-        cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true }
-
-        const isFinished = m.score_team1 !== null && m.score_team2 !== null
-        if (isFinished) {
-          const pts = user.matchPoints[m.id] || 0
-          if (pts === 5) {
-            cell.fill = solidFill(COLORS.pts5Bg)
-            cell.font = { color: { argb: COLORS.pts5Text }, bold: true }
-          } else if (pts === 3) {
-            cell.fill = solidFill(COLORS.pts3Bg)
-            cell.font = { color: { argb: COLORS.pts3Text } }
-          } else if (pts === 1) {
-            cell.fill = solidFill(COLORS.pts1Bg)
-            cell.font = { color: { argb: COLORS.pts1Text } }
-          } else {
-            cell.fill = solidFill(COLORS.pts0Bg)
-            cell.font = { color: { argb: COLORS.pts0Text } }
-          }
+      // Header row
+      const headerRow = worksheet.getRow(1)
+      headerRow.eachCell((cell) => {
+        cell.fill = solidFill(COLORS.headerBg)
+        cell.font = { color: { argb: COLORS.headerText }, bold: true }
+        cell.alignment = { horizontal: 'center', vertical: 'middle' }
+        cell.border = {
+          top:    { style: 'thin', color: { argb: COLORS.headerText } },
+          left:   { style: 'thin', color: { argb: COLORS.headerText } },
+          bottom: { style: 'thin', color: { argb: COLORS.headerText } },
+          right:  { style: 'thin', color: { argb: COLORS.headerText } }
         }
       })
+
+      // Real Results Row
+      const realResultsData = {
+        pos: '-',
+        name: 'RESULTADO REAL',
+        total: 'Score Oficial',
+        exact: '',
+        partial: ''
+      }
+      rankingInfo.groupMatches.forEach(m => {
+        const isFinished = m.score_team1 !== null && m.score_team2 !== null
+        realResultsData[`m${m.id}`] = isFinished ? `${m.score_team1}-${m.score_team2}` : 'NP'
+      })
+
+      const realRow = worksheet.addRow(realResultsData)
+      realRow.eachCell((cell, colNumber) => {
+        if (colNumber <= 5) {
+          cell.fill = solidFill(COLORS.realIdBg)
+          cell.font = { color: { argb: COLORS.realIdText }, bold: true }
+        } else {
+          cell.fill = solidFill(COLORS.realDataBg)
+          cell.font = { color: { argb: COLORS.realDataText }, bold: true }
+        }
+        cell.alignment = { horizontal: 'center', vertical: 'middle' }
+        if (colNumber === 2) cell.alignment = { horizontal: 'left', vertical: 'middle', indent: 1 }
+        if (colNumber === 3) {
+          const rowNum = realRow.number
+          worksheet.mergeCells(`C${rowNum}:E${rowNum}`)
+          cell.alignment = { horizontal: 'center', vertical: 'middle' }
+        }
+        if (colNumber > 5 && cell.value === 'NP') {
+          cell.font = { color: { argb: COLORS.realNpText }, bold: false }
+        }
+      })
+
+      // Users Rows
+      scoresList.forEach((user) => {
+        const distinctPoints = [...new Set(scoresList.map(s => s.points))]
+        const place = distinctPoints.indexOf(user.points) + 1
+
+        const rowData = {
+          pos: place,
+          name: user.name,
+          total: user.points,
+          exact: user.exactMatches,
+          partial: user.partialMatches
+        }
+
+        rankingInfo.groupMatches.forEach(m => {
+          const pred = user.predictions[m.id]
+          const pts = user.matchPoints[m.id] || 0
+          const isFinished = m.score_team1 !== null && m.score_team2 !== null
+          const scoreText = pred ? `${pred.team1}-${pred.team2}` : '-'
+          rowData[`m${m.id}`] = isFinished ? `${scoreText}\n(${pts})` : scoreText
+        })
+
+        const row = worksheet.addRow(rowData)
+
+        const rowBg =
+          place === 1 ? COLORS.rank1Bg :
+          place === 2 ? COLORS.rank2Bg :
+          place === 3 ? COLORS.rank3Bg :
+          COLORS.defaultBg
+
+        for (let c = 1; c <= worksheet.columnCount; c++) {
+          row.getCell(c).fill = solidFill(rowBg)
+          row.getCell(c).font = { color: { argb: COLORS.textDark } }
+        }
+
+        row.getCell(1).alignment = { horizontal: 'center', vertical: 'middle' }
+        row.getCell(2).alignment = { horizontal: 'left', vertical: 'middle', indent: 1 }
+        row.getCell(3).alignment = { horizontal: 'center', vertical: 'middle' }
+        row.getCell(4).alignment = { horizontal: 'center', vertical: 'middle' }
+        row.getCell(5).alignment = { horizontal: 'center', vertical: 'middle' }
+
+        row.getCell(3).font = { bold: true, color: { argb: COLORS.cyan } }
+
+        if (place === 1) {
+          row.getCell(1).font = { color: { argb: COLORS.gold },   bold: true, size: 12 }
+          row.getCell(2).font = { color: { argb: COLORS.gold },   bold: true }
+          row.getCell(3).font = { color: { argb: COLORS.cyan },   bold: true }
+        } else if (place === 2) {
+          row.getCell(1).font = { color: { argb: COLORS.silver }, bold: true, size: 12 }
+          row.getCell(2).font = { color: { argb: COLORS.silver }, bold: true }
+          row.getCell(3).font = { color: { argb: COLORS.cyan },   bold: true }
+        } else if (place === 3) {
+          row.getCell(1).font = { color: { argb: COLORS.bronze }, bold: true, size: 12 }
+          row.getCell(2).font = { color: { argb: COLORS.bronze }, bold: true }
+          row.getCell(3).font = { color: { argb: COLORS.cyan },   bold: true }
+        } else {
+          row.getCell(1).font = { color: { argb: COLORS.textDark }, bold: false }
+          row.getCell(2).font = { color: { argb: COLORS.textDark } }
+          row.getCell(3).font = { bold: true, color: { argb: COLORS.cyan } }
+        }
+
+        rankingInfo.groupMatches.forEach((m, mIdx) => {
+          const colNum = 6 + mIdx
+          const cell = row.getCell(colNum)
+          cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true }
+
+          const isFinished = m.score_team1 !== null && m.score_team2 !== null
+          if (isFinished) {
+            const pts = user.matchPoints[m.id] || 0
+            if (pts === 5) {
+              cell.fill = solidFill(COLORS.pts5Bg)
+              cell.font = { color: { argb: COLORS.pts5Text }, bold: true }
+            } else if (pts === 3) {
+              cell.fill = solidFill(COLORS.pts3Bg)
+              cell.font = { color: { argb: COLORS.pts3Text } }
+            } else if (pts === 1) {
+              cell.fill = solidFill(COLORS.pts1Bg)
+              cell.font = { color: { argb: COLORS.pts1Text } }
+            } else {
+              cell.fill = solidFill(COLORS.pts0Bg)
+              cell.font = { color: { argb: COLORS.pts0Text } }
+            }
+          }
+        })
+      })
+    }
+
+    // 1. Add consolidated worksheet with everyone
+    addSheet('Consolidado', rankingInfo.scores)
+
+    // 2. Add individual worksheets per company, sorted alphabetically
+    Object.entries(rankingInfo.scoresByEmpresa).sort().forEach(([empresaName, companyScores]) => {
+      addSheet(empresaName || 'Sin Empresa', companyScores)
     })
 
     const buffer = await workbook.xlsx.writeBuffer()
