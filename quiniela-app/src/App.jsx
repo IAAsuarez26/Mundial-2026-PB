@@ -914,6 +914,13 @@ function App() {
   const groupStandings = useMemo(() => calculateStandings(predictions), [predictions])
   const realStandings = useMemo(() => calculateStandings(realResults), [realResults])
 
+  const hasFilledRealResults = useMemo(() => {
+    return Object.values(realResults).some(r => 
+      r && r.team1 !== null && r.team1 !== undefined && r.team1 !== '' &&
+           r.team2 !== null && r.team2 !== undefined && r.team2 !== ''
+    )
+  }, [realResults])
+
   // Calculate Ranking and Stats
   const rankingInfo = useMemo(() => {
     let playedMatchesCount = 0
@@ -1725,7 +1732,7 @@ function App() {
               </section>
 
               <div style={{ display: 'flex', justifyContent: 'center', marginTop: '3rem', marginBottom: '3rem' }}>
-                <button className="save-btn" onClick={saveRealResults} style={{ padding: '1.2rem 3rem', fontSize: '1.2rem' }} disabled={isSaving}>
+                <button className="save-btn" onClick={saveRealResults} style={{ padding: '1.2rem 3rem', fontSize: '1.2rem' }} disabled={isSaving || !hasFilledRealResults}>
                   {isSaving ? 'Guardando...' : 'Guardar Resultados Reales'}
                 </button>
               </div>
