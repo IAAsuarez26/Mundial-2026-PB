@@ -79,16 +79,25 @@
   border: 1px solid var(--primary-color);
   width: 300px;
   outline: none;
+  text-align: center;
 }
 
 .user-name-input.input-cedula {
-  width: 160px;
-  text-align: center;
+  width: 150px;
+}
+
+.user-name-input.input-nombre {
+  width: 380px;
+  font-size: 1.1rem;
+}
+
+.user-name-input.input-correo {
+  width: 320px;
+  font-size: 1.1rem;
 }
 
 .user-name-input.input-empresa {
-  width: 220px;
-  text-align: center;
+  width: 200px;
 }
 
 .user-name-input::placeholder {
@@ -715,6 +724,8 @@
 
   .user-name-input,
   .user-name-input.input-cedula,
+  .user-name-input.input-nombre,
+  .user-name-input.input-correo,
   .user-name-input.input-empresa {
     width: 100%;
     max-width: 100%;

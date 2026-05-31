@@ -1162,14 +1162,14 @@ function App() {
               </div>
               <input
                 type="text"
-                className="user-name-input glass-panel"
+                className="user-name-input glass-panel input-nombre"
                 placeholder="Nombre Completo"
                 value={userName}
                 readOnly
               />
               <input
                 type="email"
-                className="user-name-input glass-panel"
+                className="user-name-input glass-panel input-correo"
                 placeholder="Correo Electrónico"
                 value={userEmail}
                 readOnly
