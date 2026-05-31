@@ -1663,7 +1663,7 @@ function App() {
                       WebkitTextFillColor: 'transparent',
                       display: 'inline-block'
                     }}>
-                      Empresa: {empresaName}
+                      {empresaName}
                     </span>
                   </h3>
                   <div className="ranking-container glass-panel" style={{ overflowX: 'auto', padding: '0' }}>
