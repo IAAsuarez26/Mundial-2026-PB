@@ -1975,6 +1975,7 @@ function App() {
             <button className="btn-primary" onClick={() => setShowManualModal(false)} style={{ width: '100%', marginTop: '1rem' }}>¡Listo, a jugar!</button>
           </div>
         </div>
+      )}
       {showAdminSuccessModal && (
         <div className="modal-overlay">
           <div className="modal-content glass-panel" style={{ textAlign: 'center', maxWidth: '450px' }}>
