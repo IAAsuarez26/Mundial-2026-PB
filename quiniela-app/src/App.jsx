@@ -7,6 +7,9 @@ import { saveAs } from 'file-saver'
 import './App.css'
 import trophyImg from './assets/trophy.png'
 import mascotImg from './assets/mascot.png'
+import logoLP from './assets/LP.png'
+import logoPB from './assets/PB.png'
+import logoPK from './assets/PK.png'
 // import data from './data.json' // Removed local data dependency
 
 
@@ -14,6 +17,27 @@ import mascotImg from './assets/mascot.png'
 const isMatchStarted = (matchDate) => {
   if (!matchDate) return false
   return new Date() > new Date(matchDate)
+}
+
+const companyLogos = {
+  'Laboratorios Ponce': logoLP,
+  'Ponce & Benzo': logoPB,
+  'Picking': logoPK
+}
+
+const companyStyles = {
+  'Laboratorios Ponce': {
+    gradient: 'linear-gradient(45deg, #00FF87, #60EFFF)',
+    borderColor: '#00FF87'
+  },
+  'Ponce & Benzo': {
+    gradient: 'linear-gradient(45deg, #00F2FE, #4FACFE)',
+    borderColor: '#00F2FE'
+  },
+  'Picking': {
+    gradient: 'linear-gradient(45deg, #FF512F, #DD2476)',
+    borderColor: '#FF512F'
+  }
 }
 
 function App() {
@@ -1598,10 +1622,44 @@ function App() {
             </div>
           ) : (
             Object.entries(rankingInfo.scoresByEmpresa).sort().map(([empresaName, companyScores]) => {
+              const styleConfig = companyStyles[empresaName] || {
+                gradient: 'linear-gradient(45deg, var(--primary-color), var(--secondary-color))',
+                borderColor: 'var(--primary-color)'
+              }
+              const logo = companyLogos[empresaName]
+
               return (
                 <div key={empresaName} className="company-ranking-group" style={{ marginBottom: '4rem' }}>
-                  <h3 className="text-gradient" style={{ fontSize: '1.8rem', fontWeight: '800', marginBottom: '1.2rem', paddingLeft: '0.5rem', borderLeft: '4px solid var(--primary-color)' }}>
-                    🏢 Empresa: {empresaName}
+                  <h3 style={{ 
+                    fontSize: '1.8rem', 
+                    fontWeight: '800', 
+                    marginBottom: '1.2rem', 
+                    paddingLeft: '0.75rem', 
+                    borderLeft: `4px solid ${styleConfig.borderColor}`,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px'
+                  }}>
+                    {logo && (
+                      <img 
+                        src={logo} 
+                        alt={empresaName} 
+                        style={{ 
+                          height: '36px', 
+                          width: 'auto', 
+                          objectFit: 'contain',
+                          filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.4))'
+                        }} 
+                      />
+                    )}
+                    <span style={{
+                      background: styleConfig.gradient,
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent',
+                      display: 'inline-block'
+                    }}>
+                      Empresa: {empresaName}
+                    </span>
                   </h3>
                   <div className="ranking-container glass-panel" style={{ overflowX: 'auto', padding: '0' }}>
                     <table className="consolidated-table">
