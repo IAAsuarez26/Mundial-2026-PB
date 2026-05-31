@@ -1645,13 +1645,15 @@ function App() {
                         src={logo} 
                         alt={empresaName} 
                         style={{ 
-                          height: '36px', 
+                          height: empresaName === 'Ponce & Benzo' ? '48px' : (empresaName === 'Laboratorios Ponce' ? '42px' : '36px'), 
                           width: 'auto', 
                           objectFit: 'contain',
                           backgroundColor: empresaName === 'Picking' ? '#ffffff' : 'transparent',
                           padding: empresaName === 'Picking' ? '4px 8px' : '0',
                           borderRadius: empresaName === 'Picking' ? '8px' : '0',
-                          filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.4))'
+                          filter: empresaName === 'Ponce & Benzo' 
+                            ? 'drop-shadow(0 0 5px rgba(255,255,255,0.25)) drop-shadow(0 2px 4px rgba(0,0,0,0.5))' 
+                            : 'drop-shadow(0 2px 4px rgba(0,0,0,0.4))'
                         }} 
                       />
                     )}
