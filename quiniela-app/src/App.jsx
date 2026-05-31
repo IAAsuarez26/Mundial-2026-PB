@@ -185,6 +185,24 @@ function App() {
 
   const toggleJornada = (jornadaName) => {
     if (currentView === 'predict' && !isUserInfoComplete) return
+    if (currentView === 'admin') {
+      if (jornadaName === 'Jornada 2') {
+        const j1Filled = matches.filter(m => m.id >= 1 && m.id <= 24).every(m => {
+          const res = realResults[m.id]
+          return res && res.team1 !== null && res.team1 !== undefined && res.team1 !== '' &&
+                       res.team2 !== null && res.team2 !== undefined && res.team2 !== ''
+        })
+        if (!j1Filled) return
+      }
+      if (jornadaName === 'Jornada 3') {
+        const j2Filled = matches.filter(m => m.id >= 25 && m.id <= 48).every(m => {
+          const res = realResults[m.id]
+          return res && res.team1 !== null && res.team1 !== undefined && res.team1 !== '' &&
+                       res.team2 !== null && res.team2 !== undefined && res.team2 !== ''
+        })
+        if (!j2Filled) return
+      }
+    }
     setExpandedJornadas(prev => ({ ...prev, [jornadaName]: !prev[jornadaName] }))
   }
 
@@ -354,6 +372,29 @@ function App() {
       }, 100);
     }
   }, [predictions, matches, hasAutoOpenedJornada3]);
+
+  // Auto-expand logic for Admin view
+  useEffect(() => {
+    if (currentView !== 'admin' || matches.length === 0) return;
+
+    const j1Filled = matches.filter(m => m.id >= 1 && m.id <= 24).every(m => {
+      const res = realResults[m.id];
+      return res && res.team1 !== null && res.team1 !== undefined && res.team1 !== '' &&
+                   res.team2 !== null && res.team2 !== undefined && res.team2 !== '';
+    });
+
+    const j2Filled = matches.filter(m => m.id >= 25 && m.id <= 48).every(m => {
+      const res = realResults[m.id];
+      return res && res.team1 !== null && res.team1 !== undefined && res.team1 !== '' &&
+                   res.team2 !== null && res.team2 !== undefined && res.team2 !== '';
+    });
+
+    setExpandedJornadas({
+      'Jornada 1': true,
+      'Jornada 2': j1Filled,
+      'Jornada 3': j1Filled && j2Filled
+    });
+  }, [currentView, realResults, matches]);
 
   // Handle score change for user predictions
   const handleScoreChange = (matchId, team, score) => {
@@ -1554,16 +1595,39 @@ function App() {
                   { name: 'Jornada 3', range: [49, 72] }
                 ].map((jornada, jIdx) => {
                   const jornadaMatches = matches.filter(m => m.id >= jornada.range[0] && m.id <= jornada.range[1])
+                  const j1FilledForLock = matches.filter(m => m.id >= 1 && m.id <= 24).every(m => {
+                    const res = realResults[m.id]
+                    return res && res.team1 !== null && res.team1 !== undefined && res.team1 !== '' &&
+                                 res.team2 !== null && res.team2 !== undefined && res.team2 !== ''
+                  })
+                  const j2FilledForLock = matches.filter(m => m.id >= 25 && m.id <= 48).every(m => {
+                    const res = realResults[m.id]
+                    return res && res.team1 !== null && res.team1 !== undefined && res.team1 !== '' &&
+                                 res.team2 !== null && res.team2 !== undefined && res.team2 !== ''
+                  })
+                  const isLocked = jIdx === 1 ? !j1FilledForLock : jIdx === 2 ? !(j1FilledForLock && j2FilledForLock) : false
+
                   return (
-                    <div key={jornada.name} className="jornada-section" style={{ marginBottom: '3rem' }}>
-                      <div
-                        className="jornada-header-toggle glass-panel"
-                        onClick={() => toggleJornada(jornada.name)}
-                        style={{ cursor: 'pointer', padding: '1rem', marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
-                      >
-                        <h3 className="text-gradient" style={{ margin: 0, fontSize: '1.5rem' }}>{jornada.name}</h3>
-                        <span style={{ fontSize: '1.5rem' }}>{expandedJornadas[jornada.name] ? '▲' : '▼'}</span>
-                      </div>
+                        <div key={jornada.name} className="jornada-section" style={{ marginBottom: '3rem' }}>
+                          <div
+                            className={`jornada-header-toggle glass-panel ${isLocked ? 'section-locked' : ''}`}
+                            onClick={() => {
+                              if (isLocked) return
+                              toggleJornada(jornada.name)
+                            }}
+                            style={{ 
+                              cursor: isLocked ? 'not-allowed' : 'pointer', 
+                              padding: '1rem', 
+                              marginBottom: '1.5rem', 
+                              display: 'flex', 
+                              justifyContent: 'space-between', 
+                              alignItems: 'center',
+                              opacity: isLocked ? 0.5 : 1
+                            }}
+                          >
+                            <h3 className="text-gradient" style={{ margin: 0, fontSize: '1.5rem' }}>{jornada.name}</h3>
+                            <span style={{ fontSize: '1.5rem' }}>{isLocked ? '🔒' : (expandedJornadas[jornada.name] ? '▲' : '▼')}</span>
+                          </div>
                       {expandedJornadas[jornada.name] && (
                         <div className="matches-grid">
                           {jornadaMatches.map((match, idx) => {
