@@ -67,6 +67,7 @@ function App() {
   const [showManualModal, setShowManualModal] = useState(false)
   const [showSuccessModal, setShowSuccessModal] = useState(false)
   const [showDuplicateModal, setShowDuplicateModal] = useState(false)
+  const [showAdminSuccessModal, setShowAdminSuccessModal] = useState(false)
   const [cedulaToEmpresa, setCedulaToEmpresa] = useState({})
   // New state to track email validation and Tab press
   const [emailConfirmed, setEmailConfirmed] = useState(false)
@@ -534,6 +535,51 @@ function App() {
     }
   }
 
+  const sendAdminNotificationEmail = () => {
+    let resultsRows = ''
+    matches.forEach(m => {
+      const res = realResults[m.id]
+      if (res && res.team1 !== null && res.team2 !== null) {
+        resultsRows += `<tr><td style="padding:6px 8px;border-bottom:1px solid #eee;font-size:14px">` +
+          `<b>${m.id}.</b> ${getTeamName(m.team1_id)} <b>${res.team1} – ${res.team2}</b> ${getTeamName(m.team2_id)}` +
+          `</td></tr>`
+      }
+    })
+
+    const emailHTML =
+      `<div style="background:#f0f2f5;padding:16px;font-family:Arial,sans-serif">` +
+      `<table width="100%" style="max-width:650px;margin:0 auto;background:#2c3e50;border-radius:8px 8px 0 0">` +
+      `<tr><td style="padding:18px;text-align:center">` +
+      `<h1 style="color:#fff;margin:0;font-size:24px">Resultados Reales Guardados</h1>` +
+      `<p style="color:#bdc3c7;margin:6px 0 0;font-size:15px">Quiniela Ponce & Benzo Mundial Norteamérica 2026 · Panel de Administración</p>` +
+      `</td></tr>` +
+      `</table>` +
+      `<table width="100%" style="max-width:650px;margin:0 auto;background:#fff;border-radius:0 0 8px 8px">` +
+      `<tr><td style="padding:24px">` +
+      `<p style="font-size:16px;color:#2c3e50;margin-top:0">Se han guardado o actualizado exitosamente los siguientes marcadores oficiales en la base de datos:</p>` +
+      `<table width="100%" cellspacing="0" style="border-collapse:collapse">${resultsRows}</table>` +
+      `</td></tr>` +
+      `</table>` +
+      `<p style="text-align:center;font-size:12px;color:#999;margin-top:12px">Enviado automáticamente · Administración Quiniela Ponce & Benzo Mundial Norteamérica 2026</p>` +
+      `</div>`
+
+    const templateParams = {
+      to_name: 'Albin Suarez',
+      to_email: 'asuarez@ponce-benzo.com',
+      message: emailHTML
+    }
+
+    const SERVICE_ID = import.meta.env.VITE_EMAILJS_SERVICE_ID
+    const TEMPLATE_ID = import.meta.env.VITE_EMAILJS_TEMPLATE_ID
+    const PUBLIC_KEY = import.meta.env.VITE_EMAILJS_PUBLIC_KEY
+
+    if (!SERVICE_ID || SERVICE_ID === "YOUR_SERVICE_ID_HERE") {
+      return Promise.resolve()
+    }
+
+    return emailjs.send(SERVICE_ID, TEMPLATE_ID, templateParams, PUBLIC_KEY)
+  }
+
   const saveRealResults = async () => {
     setIsSaving(true)
     try {
@@ -578,7 +624,13 @@ function App() {
         return m
       }))
 
-      alert('¡Resultados Reales guardados exitosamente!')
+      try {
+        await sendAdminNotificationEmail()
+      } catch (emailErr) {
+        console.error("Admin Email failed:", emailErr)
+      }
+
+      setShowAdminSuccessModal(true)
     } catch (err) {
       console.error(err)
       alert(`No se pudo guardar: ${err.message}`)
@@ -1530,11 +1582,7 @@ function App() {
                 <p>Ingresa los resultados oficiales para calcular los puntos de todos.</p>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'center' }}>
-                <button className="save-btn" onClick={saveRealResults} style={{ marginTop: 0, marginBottom: '2rem' }} disabled={isSaving}>
-                  {isSaving ? 'Guardando...' : 'Guardar Resultados Reales'}
-                </button>
-              </div>
+
 
               <section className="groups-section" style={{ marginBottom: '3rem' }}>
                 <div
@@ -1675,6 +1723,12 @@ function App() {
                   )
                 })}
               </section>
+
+              <div style={{ display: 'flex', justifyContent: 'center', marginTop: '3rem', marginBottom: '3rem' }}>
+                <button className="save-btn" onClick={saveRealResults} style={{ padding: '1.2rem 3rem', fontSize: '1.2rem' }} disabled={isSaving}>
+                  {isSaving ? 'Guardando...' : 'Guardar Resultados Reales'}
+                </button>
+              </div>
             </>
           )}
         </>
@@ -1912,6 +1966,28 @@ function App() {
             </div>
 
             <button className="btn-primary" onClick={() => setShowManualModal(false)} style={{ width: '100%', marginTop: '1rem' }}>¡Listo, a jugar!</button>
+          </div>
+        </div>
+      {showAdminSuccessModal && (
+        <div className="modal-overlay">
+          <div className="modal-content glass-panel" style={{ textAlign: 'center', maxWidth: '450px' }}>
+            <div style={{ marginBottom: '1.5rem' }}>
+              <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#2ecc71" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+              </svg>
+            </div>
+            <h2 className="text-gradient" style={{ margin: '0 0 1.2rem', fontSize: '2.2rem', fontWeight: '800' }}>Resultados Guardados</h2>
+            <p style={{ fontSize: '1.25rem', color: 'var(--text-main)', lineHeight: '1.7', marginBottom: '2rem', fontWeight: '600' }}>
+              Los resultados oficiales han sido guardados <strong style={{ color: '#2ecc71' }}>exitosamente</strong>.
+            </p>
+            <p style={{ fontSize: '1.05rem', color: 'var(--text-muted)', lineHeight: '1.7', marginBottom: '2rem' }}>
+              Se ha enviado un correo de notificación a:<br />
+              <strong style={{ color: 'white' }}>asuarez@ponce-benzo.com</strong>
+            </p>
+            <button className="save-btn" onClick={() => setShowAdminSuccessModal(false)} style={{ width: '100%', fontSize: '1.1rem' }}>
+              Aceptar
+            </button>
           </div>
         </div>
       )}
