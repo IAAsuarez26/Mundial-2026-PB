@@ -97,7 +97,8 @@
 }
 
 .user-name-input.input-empresa {
-  width: 200px;
+  width: 260px;
+  font-size: 1.1rem;
 }
 
 .user-name-input::placeholder {
