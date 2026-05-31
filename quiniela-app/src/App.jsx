@@ -598,11 +598,11 @@ function App() {
         return
       }
 
-      const response = await fetch('https://ivxvatmhgttcmyrqctos.supabase.co/functions/v1/save-results', {
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/save-results`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer sb_publishable_0AsGK4JBvD-IzmOsyj2AwQ_aQ94N0KK`
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
         },
         body: JSON.stringify({
           password: adminPassAttempt,
