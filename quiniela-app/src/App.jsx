@@ -1648,6 +1648,9 @@ function App() {
                           height: '36px', 
                           width: 'auto', 
                           objectFit: 'contain',
+                          backgroundColor: empresaName === 'Picking' ? '#ffffff' : 'transparent',
+                          padding: empresaName === 'Picking' ? '4px 8px' : '0',
+                          borderRadius: empresaName === 'Picking' ? '8px' : '0',
                           filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.4))'
                         }} 
                       />
