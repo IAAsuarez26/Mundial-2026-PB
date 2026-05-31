@@ -470,13 +470,27 @@ function App() {
 
   // Handle score change for real results
   const handleRealScoreChange = (matchId, team, score) => {
-    setRealResults(prev => ({
-      ...prev,
-      [matchId]: {
-        ...prev[matchId],
-        [team]: score === '' ? null : parseInt(score)
-      }
-    }))
+    if (score === '') {
+      setRealResults(prev => ({
+        ...prev,
+        [matchId]: {
+          ...prev[matchId],
+          [team]: null
+        }
+      }))
+      return
+    }
+    const valStr = score.slice(-1)
+    const val = parseInt(valStr)
+    if (!isNaN(val) && val >= 0 && val <= 9) {
+      setRealResults(prev => ({
+        ...prev,
+        [matchId]: {
+          ...prev[matchId],
+          [team]: val
+        }
+      }))
+    }
   }
 
   const saveRealResults = async () => {
@@ -1562,18 +1576,28 @@ function App() {
                                 <div className="match-teams">
                                   <div className="team">{getTeamName(match.team1_id)}</div>
                                   <input
-                                    type="number" min="0" className="team-input admin-input"
+                                    type="number" min="0" max="9" className="team-input admin-input"
                                     value={realResults[match.id]?.team1 ?? ''}
                                     onChange={(e) => handleRealScoreChange(match.id, 'team1', e.target.value)}
                                     onKeyDown={(e) => ['e', 'E', '+', '-', '.', ','].includes(e.key) && e.preventDefault()}
+                                    onBlur={(e) => {
+                                      if (e.target.value === '') {
+                                        e.target.focus()
+                                      }
+                                    }}
                                     placeholder="-"
                                   />
                                   <span className="vs-badge">VS</span>
                                   <input
-                                    type="number" min="0" className="team-input admin-input"
+                                    type="number" min="0" max="9" className="team-input admin-input"
                                     value={realResults[match.id]?.team2 ?? ''}
                                     onChange={(e) => handleRealScoreChange(match.id, 'team2', e.target.value)}
                                     onKeyDown={(e) => ['e', 'E', '+', '-', '.', ','].includes(e.key) && e.preventDefault()}
+                                    onBlur={(e) => {
+                                      if (e.target.value === '') {
+                                        e.target.focus()
+                                      }
+                                    }}
                                     placeholder="-"
                                   />
                                   <div className="team">{getTeamName(match.team2_id)}</div>
