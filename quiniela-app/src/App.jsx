@@ -1957,7 +1957,7 @@ function App() {
               <div className="manual-step">
                 <div className="step-num">1</div>
                 <div className="step-text">
-                  <strong>Identificación:</strong> Ingresa tu Documento de Identidad (Cédula), Nombre (o apodo) y Correo Electrónico. Recuerda que el correo es vital para recibir tu comprobante.
+                  <strong>Identificación:</strong> Ingresa tu Documento de Identidad (Cédula) y verifica que tu nombre y correo electrónico sean correctos. Recuerda que el correo es muy importante para que recibas tu comprobante.
                 </div>
               </div>
               <div className="manual-step">
