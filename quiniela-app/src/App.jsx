@@ -74,6 +74,10 @@ function App() {
   const [cedulaError, setCedulaError] = useState('')
   const [isValidatingCedula, setIsValidatingCedula] = useState(false)
 
+  // Deadline check: Miércoles 10/06/2026 a las 23:59 hora de Caracas (UTC-4)
+  const deadlineDate = new Date('2026-06-10T23:59:59-04:00')
+  const isDeadlinePassed = new Date() > deadlineDate
+
   // Validate Cédula in database and load user details
   useEffect(() => {
     const cleanCedula = userCedula.trim().replace(/\D/g, '')
@@ -644,6 +648,11 @@ function App() {
 
   // Save current user predictions
   const savePredictions = async () => {
+    if (isDeadlinePassed) {
+      alert("La fecha tope para crear y enviar tu quiniela ha pasado (Miércoles 10/06/2026 a las 23:59 hora de Caracas).")
+      return
+    }
+
     if (!userName.trim() || !userCedula.trim()) {
       alert("Por favor ingresa tu Cédula para cargar tus datos.")
       return
@@ -1497,8 +1506,13 @@ function App() {
           </section>
 
           {isUserInfoComplete && (
-            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '3rem', marginBottom: '3rem' }}>
-              <button id="save-quiniela-btn" className="save-btn" onClick={savePredictions} disabled={isSaving} style={{ padding: '1.2rem 3rem', fontSize: '1.2rem' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '3rem', marginBottom: '3rem' }}>
+              {isDeadlinePassed && (
+                <div style={{ color: '#ff4b4b', marginBottom: '1rem', fontWeight: 'bold' }}>
+                  ⚠️ El tiempo para enviar pronósticos ha finalizado.
+                </div>
+              )}
+              <button id="save-quiniela-btn" className="save-btn" onClick={savePredictions} disabled={isSaving || isDeadlinePassed} style={{ padding: '1.2rem 3rem', fontSize: '1.2rem', opacity: isDeadlinePassed ? 0.5 : 1, cursor: isDeadlinePassed ? 'not-allowed' : 'pointer' }}>
                 {isSaving ? 'Guardando...' : '¡Guardar mi Quiniela!'}
               </button>
             </div>
@@ -1921,7 +1935,7 @@ function App() {
               <h3>📋 Condiciones Generales</h3>
               <ul>
                 <li>Se permite <strong>1 quiniela por participante</strong>. Cada documento de identidad (Cédula, DNI o Pasaporte) puede registrarse una única vez.</li>
-                <li>Los pronósticos se pueden realizar hasta 24 horas antes del primer partido del Mundial.</li>
+                <li>La fecha tope para crear y enviar tu quiniela es el día Miércoles 10/06/2026 a las 23:59 hora de Caracas, Venezuela.</li>
                 <li>La transparencia es total: todos pueden ver los pronósticos de los demás en la pestaña de Ranking.</li>
               </ul>
             </div>
