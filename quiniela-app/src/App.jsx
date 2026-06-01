@@ -1934,7 +1934,7 @@ function App() {
             <div className="rules-section">
               <h3>📋 Condiciones Generales</h3>
               <ul>
-                <li>Se permite <strong>1 quiniela por participante</strong>. Cada documento de identidad (Cédula, DNI o Pasaporte) puede registrarse una única vez.</li>
+                <li>Se permite <strong>1 quiniela por participante</strong>. Cada documento de identidad (Cédula) puede registrarse sólo una vez.</li>
                 <li>La fecha tope para crear y enviar tu quiniela es el día Miércoles 10/06/2026 a las 23:59 hora de Caracas, Venezuela.</li>
                 <li>La transparencia es total: todos pueden ver los pronósticos de los demás en la pestaña de Ranking.</li>
               </ul>
@@ -1957,7 +1957,7 @@ function App() {
               <div className="manual-step">
                 <div className="step-num">1</div>
                 <div className="step-text">
-                  <strong>Identificación:</strong> Ingresa tu Documento de Identidad (Cédula, DNI o Pasaporte), Nombre (o apodo) y Correo Electrónico. Recuerda que el correo es vital para recibir tu comprobante.
+                  <strong>Identificación:</strong> Ingresa tu Documento de Identidad (Cédula), Nombre (o apodo) y Correo Electrónico. Recuerda que el correo es vital para recibir tu comprobante.
                 </div>
               </div>
               <div className="manual-step">
