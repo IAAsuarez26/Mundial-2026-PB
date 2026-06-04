@@ -1808,7 +1808,7 @@ function App() {
                         src={logo} 
                         alt={empresaName} 
                         style={{ 
-                          height: empresaName === 'Ponce & Benzo' ? '48px' : (empresaName === 'Laboratorios Ponce' ? '42px' : '36px'), 
+                          height: empresaName === 'Ponce & Benzo' ? '48px' : (empresaName === 'Picking' ? '56px' : (empresaName === 'Laboratorios Ponce' ? '42px' : '36px')), 
                           width: 'auto', 
                           objectFit: 'contain',
                           filter: empresaName === 'Ponce & Benzo' 
