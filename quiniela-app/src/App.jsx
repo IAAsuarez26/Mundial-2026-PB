@@ -40,6 +40,28 @@ const companyStyles = {
   }
 }
 
+const formatDateTimeCaracas = (dateString) => {
+  if (!dateString) return 'TBD';
+  let validDateString = dateString;
+  if (validDateString.indexOf(' ') !== -1) {
+    validDateString = validDateString.replace(' ', 'T');
+  }
+  if (!validDateString.endsWith('Z') && !validDateString.includes('+') && validDateString.length === 19) {
+    validDateString += 'Z';
+  }
+  const d = new Date(validDateString);
+  if (isNaN(d)) return 'TBD';
+  return d.toLocaleString('es-VE', {
+    timeZone: 'America/Caracas',
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true
+  }).replace(', ', ' - ').replace(',', ' - ');
+};
+
 function App() {
   const [currentView, setCurrentView] = useState('predict') // 'predict', 'admin', 'ranking'
   const [userName, setUserName] = useState('')
@@ -63,6 +85,19 @@ function App() {
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false)
   const [adminPassAttempt, setAdminPassAttempt] = useState('')
   const [isSaving, setIsSaving] = useState(false)
+
+  const visualMatchSequence = useMemo(() => {
+    if (!matches || matches.length === 0) return [];
+    const sortByDate = (a, b) => {
+      const dateA = new Date(a.date.replace(' ', 'T') + (!a.date.includes('Z') && !a.date.includes('+') ? 'Z' : ''));
+      const dateB = new Date(b.date.replace(' ', 'T') + (!b.date.includes('Z') && !b.date.includes('+') ? 'Z' : ''));
+      return dateA - dateB;
+    };
+    const j1 = matches.filter(m => m.id >= 1 && m.id <= 24).sort(sortByDate);
+    const j2 = matches.filter(m => m.id >= 25 && m.id <= 48).sort(sortByDate);
+    const j3 = matches.filter(m => m.id >= 49 && m.id <= 72).sort(sortByDate);
+    return [...j1, ...j2, ...j3];
+  }, [matches]);
   const [showRulesModal, setShowRulesModal] = useState(false)
   const [showManualModal, setShowManualModal] = useState(false)
   const [showSuccessModal, setShowSuccessModal] = useState(false)
@@ -421,17 +456,21 @@ function App() {
         nextInput.select()
       }
     } else {
-      let nextMatchId = matchId + 1
-      while (nextMatchId <= 72) {
-        const nextMatchObj = matches.find(m => m.id === nextMatchId)
+      const currentIndex = visualMatchSequence.findIndex(m => m.id === matchId);
+      if (currentIndex === -1) return;
+
+      let nextIndex = currentIndex + 1;
+      while (nextIndex < visualMatchSequence.length) {
+        const nextMatchObj = visualMatchSequence[nextIndex];
         if (nextMatchObj && !isMatchStarted(nextMatchObj.date)) {
-          break
+          break;
         }
-        nextMatchId++
+        nextIndex++;
       }
 
-      if (nextMatchId <= 72) {
-        const nextInput = document.getElementById(`input-match-${nextMatchId}-team1`)
+      if (nextIndex < visualMatchSequence.length) {
+        const nextMatchObj = visualMatchSequence[nextIndex];
+        const nextInput = document.getElementById(`input-match-${nextMatchObj.id}-team1`)
         if (nextInput) {
           nextInput.focus()
           nextInput.select()
@@ -468,7 +507,7 @@ function App() {
         return
       }
 
-      if (e.key === 'Enter') {
+      if (e.key === 'Enter' || e.key === 'Tab') {
         e.preventDefault()
         focusNextInput(matchId, field)
       }
@@ -477,8 +516,9 @@ function App() {
 
   // Enforce sequence: redirect focus to first empty match prediction input if user clicks ahead
   const handleInputFocus = (e, matchId, field) => {
-    for (let mId = 1; mId <= 72; mId++) {
-      const matchObj = matches.find(m => m.id === mId)
+    for (let i = 0; i < visualMatchSequence.length; i++) {
+      const matchObj = visualMatchSequence[i];
+      const mId = matchObj.id;
       if (matchObj && isMatchStarted(matchObj.date)) continue
 
       const pred = predictions[mId]
@@ -486,7 +526,8 @@ function App() {
       const isT1Empty = t1Val === null || t1Val === undefined || t1Val === ''
 
       if (isT1Empty) {
-        if (mId < matchId || (mId === matchId && field === 'team2')) {
+        const currentIndex = visualMatchSequence.findIndex(m => m.id === matchId);
+        if (i < currentIndex || (i === currentIndex && field === 'team2')) {
           e.preventDefault()
           const firstEmpty = document.getElementById(`input-match-${mId}-team1`)
           if (firstEmpty) {
@@ -501,7 +542,8 @@ function App() {
       const isT2Empty = t2Val === null || t2Val === undefined || t2Val === ''
 
       if (isT2Empty) {
-        if (mId < matchId) {
+        const currentIndex = visualMatchSequence.findIndex(m => m.id === matchId);
+        if (i < currentIndex) {
           e.preventDefault()
           const firstEmpty = document.getElementById(`input-match-${mId}-team2`)
           if (firstEmpty) {
@@ -1358,7 +1400,7 @@ function App() {
               { name: 'Jornada 2', range: [25, 48] },
               { name: 'Jornada 3', range: [49, 72] }
             ].map((jornada, jIdx) => {
-              const jornadaMatches = matches.filter(m => m.id >= jornada.range[0] && m.id <= jornada.range[1])
+              const jornadaMatches = visualMatchSequence.filter(m => m.id >= jornada.range[0] && m.id <= jornada.range[1]);
               return (
                 <div key={jornada.name} className="jornada-section" style={{ marginBottom: '3rem' }}>
                   <div
@@ -1384,7 +1426,7 @@ function App() {
                   {expandedJornadas[jornada.name] && (
                     <div className="matches-grid">
                       {jornadaMatches.map((match, idx) => {
-                        const dateStr = match.date ? new Date(match.date).toLocaleDateString() : 'TBD'
+                        const dateStr = formatDateTimeCaracas(match.date);
                         const started = isMatchStarted(match.date)
                         const pred = predictions[match.id]
                         const isFilled = pred && pred.team1 !== null && pred.team1 !== undefined && pred.team1 !== '' && pred.team2 !== null && pred.team2 !== undefined && pred.team2 !== ''
@@ -1392,7 +1434,7 @@ function App() {
                         return (
                           <div key={match.id} className={`glass-panel match-card ${started ? 'match-started' : ''} ${isFilled ? 'prediction-filled' : ''}`} style={{ animationDelay: `${(idx % 10) * 0.05}s` }}>
                             <div className="match-info">
-                              Partido {match.id} | {dateStr} {started && <span className="started-badge">Iniciado / Finalizado</span>}
+                              {dateStr} {started && <span className="started-badge">Iniciado / Finalizado</span>}
                             </div>
                             <div className="match-teams">
                               <div className="team">{getTeamName(match.team1_id)}</div>
@@ -1663,7 +1705,7 @@ function App() {
                   { name: 'Jornada 2', range: [25, 48] },
                   { name: 'Jornada 3', range: [49, 72] }
                 ].map((jornada, jIdx) => {
-                  const jornadaMatches = matches.filter(m => m.id >= jornada.range[0] && m.id <= jornada.range[1])
+                  const jornadaMatches = visualMatchSequence.filter(m => m.id >= jornada.range[0] && m.id <= jornada.range[1]);
                   const j1FilledForLock = matches.filter(m => m.id >= 1 && m.id <= 24).every(m => {
                     const res = realResults[m.id]
                     return res && res.team1 !== null && res.team1 !== undefined && res.team1 !== '' &&
@@ -1700,12 +1742,12 @@ function App() {
                       {expandedJornadas[jornada.name] && (
                         <div className="matches-grid">
                           {jornadaMatches.map((match, idx) => {
-                            const dateStr = match.date ? new Date(match.date).toLocaleDateString() : 'TBD'
+                            const dateStr = formatDateTimeCaracas(match.date);
                             const real = realResults[match.id]
                             const isFilled = real && real.team1 !== null && real.team1 !== undefined && real.team2 !== null && real.team2 !== undefined
                             return (
                               <div key={match.id} className={`glass-panel match-card admin-card ${isFilled ? 'admin-filled' : ''}`}>
-                                <div className="match-info">Partido {match.id} | {dateStr}</div>
+                                <div className="match-info">{dateStr}</div>
                                 <div className="match-teams">
                                   <div className="team">{getTeamName(match.team1_id)}</div>
                                   <input
