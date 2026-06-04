@@ -421,6 +421,10 @@
   padding-left: 1rem;
 }
 
+.consolidated-table td.second-col {
+  font-size: 0.8rem;
+}
+
 .consolidated-table tr:hover td {
   background: rgba(0, 242, 254, 0.05);
 }
