@@ -1979,7 +1979,7 @@ function App() {
                       {empresaName}
                     </span>
                   </h3>
-                  <div className="ranking-container glass-panel" style={{ overflowX: 'auto', padding: '0' }}>
+                  <div className="ranking-container glass-panel" style={{ overflowX: 'auto', overflowY: 'auto', maxHeight: '70vh', padding: '0' }}>
                     <table className="consolidated-table">
                       <thead>
                         <tr>
