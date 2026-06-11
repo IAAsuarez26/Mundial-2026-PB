@@ -305,7 +305,21 @@ function App() {
 
   const getTeamAbbr = (teamId) => {
     const team = teams.find(t => t.id === teamId)
-    return (team && fifaCodes[team.name]) ? fifaCodes[team.name] : teamId
+    if (!team) return teamId
+    
+    let name = team.name.trim()
+    if (fifaCodes[name]) return fifaCodes[name]
+    
+    // Fallbacks just in case there are encoding issues or slight differences
+    if (name.includes('Cura')) return 'CUW'
+    if (name.includes('Ivory') || name.includes('Ivoire')) return 'CIV'
+    if (name.includes('Bosnia')) return 'BIH'
+    if (name.includes('Korea')) return 'KOR'
+    if (name.includes('Czech')) return 'CZE'
+    if (name.includes('Saudi')) return 'KSA'
+    if (name.includes('Cape') || name.includes('Cabo')) return 'CPV'
+    
+    return teamId
   }
 
   // Load from Supabase on mount
@@ -1937,7 +1951,7 @@ function App() {
                             <th key={m.id} title={`${getTeamName(m.team1_id)} vs ${getTeamName(m.team2_id)}`}>
                               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', lineHeight: '1.2' }}>
                                 <span>P{m.id}</span>
-                                <span style={{ fontSize: '0.65rem', color: 'var(--primary-color)', marginTop: '2px', fontWeight: 'bold' }}>
+                                <span style={{ fontSize: '0.65rem', color: '#ffeb3b', marginTop: '2px', fontWeight: 'bold' }}>
                                   {getTeamAbbr(m.team1_id)}-{getTeamAbbr(m.team2_id)}
                                 </span>
                               </div>
