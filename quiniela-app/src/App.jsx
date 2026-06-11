@@ -109,8 +109,8 @@ function App() {
   const [cedulaError, setCedulaError] = useState('')
   const [isValidatingCedula, setIsValidatingCedula] = useState(false)
 
-  // Deadline check: Jueves 11/06/2026 a las 12:00 del mediodía hora de Caracas (UTC-4)
-  const deadlineDate = new Date('2026-06-11T12:00:00-04:00')
+  // Deadline check: Jueves 11/06/2026 a las 2:00 pm hora de Caracas (UTC-4)
+  const deadlineDate = new Date('2026-06-11T14:00:00-04:00')
   const isDeadlinePassed = new Date() > deadlineDate
 
   // Validate Cédula in database and load user details
