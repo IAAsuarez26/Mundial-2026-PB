@@ -1434,7 +1434,7 @@ function App() {
                         return (
                           <div key={match.id} className={`glass-panel match-card ${started ? 'match-started' : ''} ${isFilled ? 'prediction-filled' : ''}`} style={{ animationDelay: `${(idx % 10) * 0.05}s` }}>
                             <div className="match-info">
-                              {dateStr} {started && <span className="started-badge">Iniciado / Finalizado</span>}
+                              <span style={{ fontWeight: 700, color: 'var(--accent)', marginRight: '0.4rem' }}>P{match.id}</span>{dateStr} {started && <span className="started-badge">Iniciado / Finalizado</span>}
                             </div>
                             <div className="match-teams">
                               <div className="team">{getTeamName(match.team1_id)}</div>
@@ -1747,7 +1747,7 @@ function App() {
                             const isFilled = real && real.team1 !== null && real.team1 !== undefined && real.team2 !== null && real.team2 !== undefined
                             return (
                               <div key={match.id} className={`glass-panel match-card admin-card ${isFilled ? 'admin-filled' : ''}`}>
-                                <div className="match-info">{dateStr}</div>
+                                <div className="match-info"><span style={{ fontWeight: 700, color: 'var(--accent)', marginRight: '0.4rem' }}>P{match.id}</span>{dateStr}</div>
                                 <div className="match-teams">
                                   <div className="team">{getTeamName(match.team1_id)}</div>
                                   <input
