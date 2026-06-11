@@ -67,7 +67,8 @@ for _, row in df_matches.iterrows():
                 dt_host = date_host
             else:
                 dt_host = datetime.strptime(str(date_host).strip(), '%Y-%m-%d %H:%M:%S')
-            # Treat Excel date as Caracas time (UTC-4). Convert to UTC by adding 4 hours.
+            # Times in Excel are in Caracas/Venezuela time (UTC-4)
+            # Convert to UTC by adding 4 hours
             dt_utc = dt_host + timedelta(hours=4)
             date_utc_str = dt_utc.strftime('%Y-%m-%d %H:%M:%S')
         else:

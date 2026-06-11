@@ -109,8 +109,8 @@ function App() {
   const [cedulaError, setCedulaError] = useState('')
   const [isValidatingCedula, setIsValidatingCedula] = useState(false)
 
-  // Deadline check: Miércoles 10/06/2026 a las 23:59 hora de Caracas (UTC-4)
-  const deadlineDate = new Date('2026-06-10T23:59:59-04:00')
+  // Deadline check: Jueves 11/06/2026 a las 12:00 del mediodía hora de Caracas (UTC-4)
+  const deadlineDate = new Date('2026-06-11T12:00:00-04:00')
   const isDeadlinePassed = new Date() > deadlineDate
 
   // Validate Cédula in database and load user details
@@ -691,7 +691,7 @@ function App() {
   // Save current user predictions
   const savePredictions = async () => {
     if (isDeadlinePassed) {
-      alert("La fecha tope para crear y enviar tu quiniela ha pasado (Miércoles 10/06/2026 a las 23:59 hora de Caracas).")
+      alert("La fecha tope para crear y enviar tu quiniela ha pasado (Jueves 11/06/2026 a las 12:00 del mediodía hora de Caracas).")
       return
     }
 
@@ -1974,7 +1974,7 @@ function App() {
               <h3>📋 Condiciones Generales</h3>
               <ul>
                 <li>Se permite <strong>1 quiniela por participante</strong>. Cada documento de identidad (Cédula) puede registrarse sólo una vez.</li>
-                <li>La fecha tope para crear y enviar tu quiniela es el día Miércoles 10/06/2026 a las 23:59 hora de Caracas, Venezuela.</li>
+                <li>La fecha tope para crear y enviar tu quiniela es el día Jueves 11/06/2026 a las 12:00 del mediodía hora de Caracas, Venezuela.</li>
                 <li>La transparencia es total: todos pueden ver los pronósticos de los demás en la pestaña de Ranking.</li>
               </ul>
             </div>
