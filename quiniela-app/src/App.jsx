@@ -252,6 +252,62 @@ function App() {
     return team ? team.name : teamId
   }
 
+  const fifaCodes = {
+    'Mexico': 'MEX',
+    'South Africa': 'RSA',
+    'Rep. of Korea': 'KOR',
+    'Czech Rep.': 'CZE',
+    'Canada': 'CAN',
+    'Bosnia/Herzeg.': 'BIH',
+    'Qatar': 'QAT',
+    'Switzerland': 'SUI',
+    'Brazil': 'BRA',
+    'Morocco': 'MAR',
+    'Haiti': 'HAI',
+    'Scotland': 'SCO',
+    'USA': 'USA',
+    'Paraguay': 'PAR',
+    'Australia': 'AUS',
+    'Turkey': 'TUR',
+    'Germany': 'GER',
+    'Curaçao': 'CUW',
+    'Ivory Coast': 'CIV',
+    'Ecuador': 'ECU',
+    'Netherlands': 'NED',
+    'Japan': 'JPN',
+    'Sweden': 'SWE',
+    'Tunisia': 'TUN',
+    'Belgium': 'BEL',
+    'Egypt': 'EGY',
+    'IR Iran': 'IRN',
+    'New Zealand': 'NZL',
+    'Spain': 'ESP',
+    'Cape Verde': 'CPV',
+    'Saudi Arabia': 'KSA',
+    'Uruguay': 'URU',
+    'France': 'FRA',
+    'Senegal': 'SEN',
+    'Iraq': 'IRQ',
+    'Norway': 'NOR',
+    'Argentina': 'ARG',
+    'Algeria': 'ALG',
+    'Austria': 'AUT',
+    'Jordan': 'JOR',
+    'Portugal': 'POR',
+    'DR Congo': 'COD',
+    'Uzbekistan': 'UZB',
+    'Colombia': 'COL',
+    'England': 'ENG',
+    'Croatia': 'CRO',
+    'Ghana': 'GHA',
+    'Panama': 'PAN'
+  }
+
+  const getTeamAbbr = (teamId) => {
+    const team = teams.find(t => t.id === teamId)
+    return (team && fifaCodes[team.name]) ? fifaCodes[team.name] : teamId
+  }
+
   // Load from Supabase on mount
   useEffect(() => {
     const fetchData = async () => {
@@ -1879,7 +1935,12 @@ function App() {
                           <th>Pa</th>
                           {rankingInfo.groupMatches.map(m => (
                             <th key={m.id} title={`${getTeamName(m.team1_id)} vs ${getTeamName(m.team2_id)}`}>
-                              P{m.id}
+                              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', lineHeight: '1.2' }}>
+                                <span>P{m.id}</span>
+                                <span style={{ fontSize: '0.65rem', color: 'var(--primary-color)', marginTop: '2px', fontWeight: 'bold' }}>
+                                  {getTeamAbbr(m.team1_id)}-{getTeamAbbr(m.team2_id)}
+                                </span>
+                              </div>
                             </th>
                           ))}
                         </tr>
