@@ -308,17 +308,58 @@ function App() {
     if (!team) return teamId
     
     let name = team.name.trim()
+    let nameNoAccents = name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase()
+    
+    if (nameNoAccents.includes('cura')) return 'CUW'
+    if (nameNoAccents.includes('ivoire') || nameNoAccents.includes('marfil')) return 'CIV'
+    if (nameNoAccents.includes('bosnia')) return 'BIH'
+    if (nameNoAccents.includes('corea') || nameNoAccents.includes('korea')) return 'KOR'
+    if (nameNoAccents.includes('checa') || nameNoAccents.includes('czech')) return 'CZE'
+    if (nameNoAccents.includes('saudi') || nameNoAccents.includes('arabia')) return 'KSA'
+    if (nameNoAccents.includes('cabo') || nameNoAccents.includes('cape')) return 'CPV'
+    if (nameNoAccents.includes('ee. uu.') || nameNoAccents.includes('usa')) return 'USA'
+    if (nameNoAccents.includes('mexico')) return 'MEX'
+    if (nameNoAccents.includes('sudafrica')) return 'RSA'
+    if (nameNoAccents.includes('canada')) return 'CAN'
+    if (nameNoAccents.includes('catar') || nameNoAccents.includes('qatar')) return 'QAT'
+    if (nameNoAccents.includes('suiza')) return 'SUI'
+    if (nameNoAccents.includes('brasil')) return 'BRA'
+    if (nameNoAccents.includes('marruecos')) return 'MAR'
+    if (nameNoAccents.includes('haiti')) return 'HAI'
+    if (nameNoAccents.includes('escocia')) return 'SCO'
+    if (nameNoAccents.includes('paraguay')) return 'PAR'
+    if (nameNoAccents.includes('australia')) return 'AUS'
+    if (nameNoAccents.includes('turquia')) return 'TUR'
+    if (nameNoAccents.includes('alemania')) return 'GER'
+    if (nameNoAccents.includes('ecuador')) return 'ECU'
+    if (nameNoAccents.includes('paises bajos') || nameNoAccents.includes('netherlands')) return 'NED'
+    if (nameNoAccents.includes('japon')) return 'JPN'
+    if (nameNoAccents.includes('suecia')) return 'SWE'
+    if (nameNoAccents.includes('tunez')) return 'TUN'
+    if (nameNoAccents.includes('belgica')) return 'BEL'
+    if (nameNoAccents.includes('egipto')) return 'EGY'
+    if (nameNoAccents.includes('iran')) return 'IRN'
+    if (nameNoAccents.includes('nueva zelanda')) return 'NZL'
+    if (nameNoAccents.includes('españa') || nameNoAccents.includes('espana')) return 'ESP'
+    if (nameNoAccents.includes('uruguay')) return 'URU'
+    if (nameNoAccents.includes('francia')) return 'FRA'
+    if (nameNoAccents.includes('senegal')) return 'SEN'
+    if (nameNoAccents.includes('irak')) return 'IRQ'
+    if (nameNoAccents.includes('noruega')) return 'NOR'
+    if (nameNoAccents.includes('argentina')) return 'ARG'
+    if (nameNoAccents.includes('argelia')) return 'ALG'
+    if (nameNoAccents.includes('austria')) return 'AUT'
+    if (nameNoAccents.includes('jordania')) return 'JOR'
+    if (nameNoAccents.includes('portugal')) return 'POR'
+    if (nameNoAccents.includes('congo')) return 'COD'
+    if (nameNoAccents.includes('uzbekistan')) return 'UZB'
+    if (nameNoAccents.includes('colombia')) return 'COL'
+    if (nameNoAccents.includes('inglaterra')) return 'ENG'
+    if (nameNoAccents.includes('croacia')) return 'CRO'
+    if (nameNoAccents.includes('ghana')) return 'GHA'
+    if (nameNoAccents.includes('panama')) return 'PAN'
+    
     if (fifaCodes[name]) return fifaCodes[name]
-    
-    // Fallbacks just in case there are encoding issues or slight differences
-    if (name.includes('Cura')) return 'CUW'
-    if (name.includes('Ivory') || name.includes('Ivoire')) return 'CIV'
-    if (name.includes('Bosnia')) return 'BIH'
-    if (name.includes('Korea')) return 'KOR'
-    if (name.includes('Czech')) return 'CZE'
-    if (name.includes('Saudi')) return 'KSA'
-    if (name.includes('Cape') || name.includes('Cabo')) return 'CPV'
-    
     return teamId
   }
 
